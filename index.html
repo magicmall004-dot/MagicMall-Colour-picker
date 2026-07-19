@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MagicMall — Color & Gradient Picker</title>
-<meta name="description" content="Pick solid colors, build gradients, generate palettes, and lift colors from an image — tap any swatch to reveal, tap again to copy.">
+<title>MagicMall Colour Forge — Colour Code Generator</title>
+<meta name="description" content="MagicMall's colour code generator: pick solid colours, build gradients, generate palettes, and lift colours from an image — tap any swatch to reveal, tap again to copy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -21,7 +21,11 @@
   }
 
   *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-  html{ scroll-behavior:smooth; }
+  html{ scroll-behavior:smooth; scrollbar-color:var(--accent-a) var(--bg-deep); scrollbar-width:thin; }
+
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-track{ background:var(--bg-deep); }
+  ::-webkit-scrollbar-thumb{ background:linear-gradient(var(--accent-a), var(--accent-b)); border-radius:10px; border:2px solid var(--bg-deep); }
 
   body{
     background:var(--bg-deep);
@@ -51,7 +55,6 @@
     font-family:'JetBrains Mono', monospace; font-size:12.5px; letter-spacing:0.14em;
     text-transform:uppercase; color:var(--text-dim); display:flex; align-items:center; gap:10px; margin-bottom:22px;
   }
-  .eyebrow::before{ content:''; width:7px; height:7px; border-radius:50%; background:var(--accent-mix); box-shadow:0 0 12px var(--accent-a); }
 
   h1{
     font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:clamp(2.4rem, 5.6vw, 4.4rem);
@@ -80,29 +83,52 @@
 
   /* ---------- Glass panel base ---------- */
   .panel{
+    position:relative;
     background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius);
     backdrop-filter:blur(22px) saturate(140%); -webkit-backdrop-filter:blur(22px) saturate(140%);
     box-shadow:0 8px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
-    padding:32px; margin-bottom:28px; animation:rise 0.7s cubic-bezier(.2,.8,.2,1) both;
+    padding:32px; margin-bottom:28px;
+    opacity:0; transform:translateY(28px);
+    transition:opacity 0.7s cubic-bezier(.2,.8,.2,1), transform 0.7s cubic-bezier(.2,.8,.2,1), border-color 0.3s ease;
   }
+  .panel.in-view{ opacity:1; transform:translateY(0); }
+  .panel::before{
+    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:0;
+    background:radial-gradient(360px circle at var(--mx,50%) var(--my,20%), rgba(255,255,255,0.07), transparent 70%);
+    opacity:0; transition:opacity 0.4s ease;
+  }
+  .panel:hover::before{ opacity:1; }
+  .panel > *{ position:relative; z-index:1; }
   @keyframes rise{ from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);} }
 
   .panel-head{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:26px; }
   .panel-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:1.5rem; display:flex; align-items:center; gap:12px; }
-  .panel-num{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-dim); border:1px solid var(--glass-border); border-radius:7px; padding:3px 8px; }
+  .panel-num{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text);
+    position:relative; border-radius:8px; padding:4px 9px; background:rgba(255,255,255,0.05);
+    border:1px solid transparent;
+    background-image:linear-gradient(rgba(255,255,255,0.05), rgba(255,255,255,0.05)), var(--accent-mix);
+    background-origin:border-box; background-clip:padding-box, border-box;
+  }
   .panel-desc{ color:var(--text-dim); font-size:0.92rem; max-width:48ch; margin-top:6px; }
 
   /* ---------- Tabs ---------- */
   .tabbar{
-    display:inline-flex; gap:4px; padding:4px; background:rgba(255,255,255,0.04);
+    position:relative; display:inline-flex; gap:4px; padding:4px; background:rgba(255,255,255,0.04);
     border:1px solid var(--glass-border); border-radius:14px; margin-bottom:26px;
   }
+  .tab-indicator{
+    position:absolute; top:4px; bottom:4px; left:4px; width:0; border-radius:10px;
+    background:var(--accent-mix); z-index:0;
+    transition:left 0.32s cubic-bezier(.2,.8,.2,1), width 0.32s cubic-bezier(.2,.8,.2,1);
+  }
   .tab-btn{
+    position:relative; z-index:1;
     font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px; color:var(--text-dim);
     background:transparent; border:none; padding:9px 20px; border-radius:10px; cursor:pointer;
-    transition:background 0.2s ease, color 0.2s ease;
+    transition:color 0.2s ease;
   }
-  .tab-btn.active{ background:var(--accent-mix); color:#0a0a0f; }
+  .tab-btn.active{ color:#0a0a0f; }
 
   .tab-panel{ display:none; animation:rise 0.4s ease both; }
   .tab-panel.active{ display:block; }
@@ -143,13 +169,27 @@
   option{ background:#150f2a; color:var(--text); }
 
   .btn{
+    position:relative; overflow:hidden;
     font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14.5px; color:#0a0a0f;
     background:var(--accent-mix); border:none; border-radius:12px; padding:12px 22px; cursor:pointer;
     transition:transform 0.18s ease, box-shadow 0.18s ease; box-shadow:0 6px 22px rgba(255,62,165,0.22);
   }
+  .btn::after{
+    content:''; position:absolute; top:0; left:-70%; width:40%; height:100%;
+    background:linear-gradient(115deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform:skewX(-18deg); transition:left 0.55s ease;
+  }
+  .btn:hover::after{ left:130%; }
   .btn:hover{ transform:translateY(-2px); box-shadow:0 10px 28px rgba(53,231,255,0.28); }
   .btn:active{ transform:translateY(0); }
   .btn.ghost{ background:transparent; border:1px solid var(--glass-border); color:var(--text); box-shadow:none; }
+
+  .logo-mark{
+    width:15px; height:15px; border-radius:5px; background:var(--accent-mix);
+    box-shadow:0 0 14px var(--accent-a); flex-shrink:0; transform:rotate(45deg);
+    animation:markPulse 3.2s ease-in-out infinite;
+  }
+  @keyframes markPulse{ 0%,100%{ transform:rotate(45deg) scale(1); } 50%{ transform:rotate(45deg) scale(1.15); } }
 
   /* ---------- Swatch grid ---------- */
   .swatches{ margin-top:28px; display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:14px 12px; }
@@ -304,6 +344,48 @@
 
   footer{ text-align:center; color:var(--text-dim); font-family:'JetBrains Mono', monospace; font-size:12px; padding:40px 0 10px; position:relative; z-index:2; }
 
+  /* ---------- Sticky quick nav ---------- */
+  #quick-nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 28px; background:rgba(8,10,20,0.75);
+    backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%);
+    border-bottom:1px solid var(--glass-border);
+    transform:translateY(-100%); opacity:0; transition:transform 0.3s ease, opacity 0.3s ease; pointer-events:none;
+  }
+  #quick-nav.show{ transform:translateY(0); opacity:1; pointer-events:auto; }
+  .qn-brand{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14.5px; display:flex; align-items:center; gap:9px; color:var(--text); }
+  .qn-links{ display:flex; gap:2px; }
+  .qn-links a{
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--text-dim); text-decoration:none;
+    padding:8px 13px; border-radius:8px; transition:background 0.2s ease, color 0.2s ease;
+  }
+  .qn-links a:hover{ background:rgba(255,255,255,0.07); color:var(--text); }
+  @media (max-width:640px){ .qn-links{ display:none; } }
+
+  /* ---------- Recently copied strip ---------- */
+  .recent-bar{ display:flex; align-items:center; gap:16px; margin-bottom:30px; flex-wrap:wrap; }
+  .recent-label{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); flex-shrink:0; }
+  .recent-strip{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .recent-chip{ width:34px; height:34px; border-radius:9px; border:1px solid rgba(255,255,255,0.2); cursor:pointer; transition:transform 0.18s ease, box-shadow 0.18s ease; flex-shrink:0; }
+  .recent-chip:hover{ transform:translateY(-3px) scale(1.06); box-shadow:0 8px 16px rgba(0,0,0,0.35); }
+  .recent-empty{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--text-dim); opacity:0.75; }
+
+  /* ---------- Swatches toolbar (vibe name / copy-all) ---------- */
+  .swatches-toolbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap; }
+  .vibe-name{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:15px; display:flex; align-items:center; gap:8px; color:var(--text); }
+  .vibe-name .spark{ background:var(--accent-mix); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .btn.small-btn{ padding:8px 16px; font-size:13px; }
+
+  /* ---------- CSS output box ---------- */
+  .css-output{
+    margin-top:18px; padding:14px 16px; border-radius:12px; background:rgba(255,255,255,0.04);
+    border:1px solid var(--glass-border); cursor:pointer; transition:border-color 0.2s ease, color 0.2s ease;
+  }
+  .css-output:hover{ border-color:var(--accent-b); }
+  .css-output .label{ display:block; font-family:'JetBrains Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:7px; }
+  .css-output .code-line{ font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--text); word-break:break-all; line-height:1.5; }
+
   @media (max-width:640px){
     .panel{ padding:22px; }
     .controls{ gap:14px; }
@@ -320,16 +402,31 @@
 <canvas id="aurora"></canvas>
 <div class="grain"></div>
 
+<nav id="quick-nav">
+  <div class="qn-brand"><span class="logo-mark"></span>MagicMall Colour Forge</div>
+  <div class="qn-links">
+    <a href="#studio-panel">Studio</a>
+    <a href="#palette-panel">Palette</a>
+    <a href="#image-panel">Image</a>
+    <a href="#theme-panel">Theme</a>
+  </div>
+</nav>
+
 <div class="wrap">
 
   <header class="hero">
-    <div class="eyebrow">Palette Forge · color tooling</div>
-    <h1>MagicMall, <span class="grad-text">Pick & generate a color .</span></h1>
-    <p class="hero-sub">Solid colors, gradients, full palettes, and colors lifted straight from your own images. Tap a swatch to reveal its code, tap again to copy it.</p>
+    <div class="eyebrow"><span class="logo-mark"></span>MagicMall · colour code generator</div>
+    <h1>Pick a colour, <span class="grad-text">build your MagicMall palette.</span></h1>
+    <p class="hero-sub">Solid colours, gradients, full palettes, and colours lifted straight from your own images. Tap a swatch to reveal its code, tap again to copy it.</p>
   </header>
 
   <div class="marquee-shell">
     <div class="marquee-track" id="marquee-track"></div>
+  </div>
+
+  <div class="recent-bar">
+    <span class="recent-label">Recently copied</span>
+    <div class="recent-strip" id="recent-strip"><span class="recent-empty">Tap any swatch to start collecting colours.</span></div>
   </div>
 
   <!-- ================= COLOR STUDIO (Solid / Gradient tabs) ================= -->
@@ -342,6 +439,7 @@
     </div>
 
     <div class="tabbar" role="tablist" aria-label="Color mode">
+      <span class="tab-indicator" id="tab-indicator"></span>
       <button class="tab-btn active" id="tab-solid-btn" role="tab" aria-selected="true">Solid</button>
       <button class="tab-btn" id="tab-gradient-btn" role="tab" aria-selected="false">Gradient</button>
     </div>
@@ -407,7 +505,12 @@
         <button class="btn" id="grad-generate">Generate ramp</button>
       </div>
 
+      <div class="swatches-toolbar">
+        <span class="vibe-name"><span class="spark">✦</span> Gradient ramp</span>
+        <button class="btn ghost small-btn" id="grad-copy-all">Copy all</button>
+      </div>
       <div class="swatches" id="grad-swatches"></div>
+      <div class="css-output" id="grad-css-output"></div>
     </div>
   </section>
 
@@ -446,6 +549,10 @@
       <button class="btn" id="pal-generate">Generate palette</button>
     </div>
 
+    <div class="swatches-toolbar">
+      <span class="vibe-name" id="pal-vibe-name"><span class="spark">✦</span> —</span>
+      <button class="btn ghost small-btn" id="pal-copy-all">Copy all</button>
+    </div>
     <div class="swatches" id="pal-swatches"></div>
   </section>
 
@@ -478,7 +585,10 @@
               tap again on the swatch to copy
             </div>
           </div>
-          <button class="btn ghost" id="extract-btn">Auto-extract dominant colors</button>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn ghost" id="extract-btn">Auto-extract dominant colours</button>
+            <button class="btn ghost small-btn" id="extract-copy-all">Copy all</button>
+          </div>
           <div class="swatches" id="extract-swatches" style="grid-template-columns:repeat(auto-fill, minmax(90px,1fr));"></div>
         </div>
       </div>
@@ -528,7 +638,7 @@
 
 <div id="toast"><span class="dot"></span><span id="toast-text">Copied #FFFFFF</span></div>
 
-<footer>Palette Forge — built for pulling color codes into your own designs.</footer>
+<footer>MagicMall Colour Forge — built for pulling colour codes straight into your designs.</footer>
 
 <script>
 (function(){
@@ -631,24 +741,57 @@
   const toast = document.getElementById('toast');
   const toastText = document.getElementById('toast-text');
   let toastTimer;
-  function showToast(hex){
-    toastText.textContent = 'Copied ' + hex;
+  function showToast(message){
+    toastText.textContent = message;
     toast.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(()=> toast.classList.remove('show'), 1600);
   }
-  function copyHex(hex){
+  function copyToClipboard(text, message){
+    const msg = message || ('Copied ' + text);
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(hex).then(()=>showToast(hex)).catch(()=>showToast(hex));
+      navigator.clipboard.writeText(text).then(()=>showToast(msg)).catch(()=>showToast(msg));
     } else {
       const ta = document.createElement('textarea');
-      ta.value = hex;
+      ta.value = text;
       document.body.appendChild(ta);
       ta.select();
       try{ document.execCommand('copy'); } catch(e){}
       document.body.removeChild(ta);
-      showToast(hex);
+      showToast(msg);
     }
+    if(isValidHex(text)) pushRecent(text.toUpperCase());
+  }
+  function copyHex(hex){ copyToClipboard(hex); }
+
+  /* ================= Recently copied strip ================= */
+  const recentStrip = document.getElementById('recent-strip');
+  let recentColors = [];
+  function pushRecent(hex){
+    recentColors = recentColors.filter(c=> c !== hex);
+    recentColors.unshift(hex);
+    if(recentColors.length > 12) recentColors = recentColors.slice(0,12);
+    renderRecentStrip();
+  }
+  function renderRecentStrip(){
+    recentStrip.innerHTML = '';
+    if(!recentColors.length){
+      const note = document.createElement('span');
+      note.className = 'recent-empty';
+      note.textContent = 'Tap any swatch to start collecting colours.';
+      recentStrip.appendChild(note);
+      return;
+    }
+    recentColors.forEach(hex=>{
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'recent-chip';
+      chip.style.background = hex;
+      chip.title = hex;
+      chip.setAttribute('aria-label', 'Copy ' + hex);
+      chip.addEventListener('click', ()=> copyHex(hex));
+      recentStrip.appendChild(chip);
+    });
   }
 
   /* ================= Tap-to-reveal, tap-again-to-copy swatch interaction ================= */
@@ -869,9 +1012,18 @@
     tabGradientBtn.setAttribute('aria-selected', !solidActive);
     tabSolid.classList.toggle('active', solidActive);
     tabGradient.classList.toggle('active', !solidActive);
+    updateTabIndicator();
   }
   tabSolidBtn.addEventListener('click', ()=> setTab('solid'));
   tabGradientBtn.addEventListener('click', ()=> setTab('gradient'));
+
+  const tabIndicator = document.getElementById('tab-indicator');
+  function updateTabIndicator(){
+    const activeBtn = tabSolidBtn.classList.contains('active') ? tabSolidBtn : tabGradientBtn;
+    tabIndicator.style.left = activeBtn.offsetLeft + 'px';
+    tabIndicator.style.width = activeBtn.offsetWidth + 'px';
+  }
+  window.addEventListener('resize', updateTabIndicator);
 
   /* ================= Solid color chart ================= */
   const chartCount = document.getElementById('chart-count');
@@ -902,6 +1054,9 @@
   solidPreview.addEventListener('click', ()=> copyHex(solidColor.value));
 
   /* ================= Gradient generator ================= */
+  let lastGradHexes = [];
+  let lastPalHexes = [];
+  let lastExtractHexes = [];
   const gradSteps = document.getElementById('grad-steps');
   const gradSwatchesEl = document.getElementById('grad-swatches');
 
@@ -926,13 +1081,35 @@
       out.push(hexFromHsl(h,s,l));
     }
     renderSwatches(gradSwatchesEl, out);
+    lastGradHexes = out.slice();
+    const cssStr = `linear-gradient(90deg, ${out.join(', ')})`;
+    gradCssOutput.innerHTML = `<span class="label">CSS · tap to copy</span><span class="code-line">background: ${cssStr};</span>`;
   }
   document.getElementById('grad-generate').addEventListener('click', buildGradient);
+  const gradCssOutput = document.getElementById('grad-css-output');
+  gradCssOutput.addEventListener('click', ()=>{
+    if(!lastGradHexes.length) return;
+    copyToClipboard(`linear-gradient(90deg, ${lastGradHexes.join(', ')})`, 'Copied gradient CSS');
+  });
+  document.getElementById('grad-copy-all').addEventListener('click', ()=>{
+    if(!lastGradHexes.length) return;
+    copyToClipboard(lastGradHexes.join(', '), lastGradHexes.length + ' colours copied');
+  });
 
   /* ================= Palette generator ================= */
   const pMode = document.getElementById('pal-mode');
   const pCount = document.getElementById('pal-count');
   const palSwatchesEl = document.getElementById('pal-swatches');
+  const palVibeName = document.getElementById('pal-vibe-name');
+
+  const vibeAdjectives = ['Neon','Velvet','Frost','Ember','Nebula','Glass','Midnight','Electric','Pastel','Cosmic','Molten','Arctic','Golden','Shadow','Crystal','Rogue','Silk','Solar'];
+  const vibeNouns = ['Dusk','Bloom','Drift','Pulse','Haze','Echo','Bay','Fever','Static','Mirage','Aurora','Current','Glow','Tide','Signal','Orbit','Mint'];
+  function generateVibeName(mode, hue, sat, light, count){
+    let seed = Math.round(hue*13 + sat*7 + light*3 + mode.length*11 + count*5);
+    const a = vibeAdjectives[seed % vibeAdjectives.length];
+    const n = vibeNouns[Math.floor(seed/3) % vibeNouns.length];
+    return a + ' ' + n;
+  }
 
   function buildPalette(){
     const count = clampInt(pCount.value, 2, 24);
@@ -989,8 +1166,15 @@
       }
     }
     renderSwatches(palSwatchesEl, out);
+    lastPalHexes = out.slice();
+    const name = generateVibeName(mode, base.h, base.s, base.l, count);
+    palVibeName.innerHTML = '<span class="spark">✦</span> ' + name;
   }
   document.getElementById('pal-generate').addEventListener('click', buildPalette);
+  document.getElementById('pal-copy-all').addEventListener('click', ()=>{
+    if(!lastPalHexes.length) return;
+    copyToClipboard(lastPalHexes.join(', '), lastPalHexes.length + ' colours copied');
+  });
 
   /* ================= Image color picker ================= */
   const dropZone = document.getElementById('drop-zone');
@@ -1102,6 +1286,11 @@
     }
     const hexes = picked.map(c=> rgbToHex(c.r,c.g,c.b));
     renderSwatches(extractSwatchesEl, hexes, true);
+    lastExtractHexes = hexes.slice();
+  });
+  document.getElementById('extract-copy-all').addEventListener('click', ()=>{
+    if(!lastExtractHexes.length) return;
+    copyToClipboard(lastExtractHexes.join(', '), lastExtractHexes.length + ' colours copied');
   });
 
   /* ================= Theme accent ================= */
@@ -1141,10 +1330,40 @@
   const themeA = ColorControl('theme-a', null, '#FF3EA5', applyTheme);
   const themeB = ColorControl('theme-b', null, '#35E7FF', applyTheme);
 
+  /* ================= Sticky quick nav ================= */
+  const quickNav = document.getElementById('quick-nav');
+  const heroEl = document.querySelector('header.hero');
+  window.addEventListener('scroll', ()=>{
+    const trigger = heroEl.offsetTop + heroEl.offsetHeight;
+    quickNav.classList.toggle('show', window.scrollY > trigger);
+  }, { passive:true });
+
   /* ================= Initial render ================= */
   buildSolidChart();
   buildGradient();
   buildPalette();
+  renderRecentStrip();
+  updateTabIndicator();
+
+  /* ================= Scroll-reveal panels ================= */
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold:0.12, rootMargin:'0px 0px -40px 0px' });
+  document.querySelectorAll('.panel').forEach(p=> revealObserver.observe(p));
+
+  /* ================= Panel spotlight glow ================= */
+  document.querySelectorAll('.panel').forEach(panel=>{
+    panel.addEventListener('mousemove', e=>{
+      const rect = panel.getBoundingClientRect();
+      panel.style.setProperty('--mx', ((e.clientX-rect.left)/rect.width*100).toFixed(1)+'%');
+      panel.style.setProperty('--my', ((e.clientY-rect.top)/rect.height*100).toFixed(1)+'%');
+    });
+  });
 
   /* ================= Aurora canvas background ================= */
   const canvas = document.getElementById('aurora');
