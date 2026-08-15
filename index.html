@@ -297,6 +297,37 @@
   }
 
   /* ---------- Image picker ---------- */
+  .lottie-stage{ margin-top:22px; display:none; }
+  .lottie-stage.active{ display:block; }
+  .lottie-meta{ display:flex; flex-wrap:wrap; gap:8px 16px; font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-dim); }
+  .lottie-meta b{ color:var(--text); }
+
+  .lottie-legend{ display:flex; flex-wrap:wrap; gap:10px 22px; margin-top:18px; padding:14px 16px; background:var(--glass); border:1px solid var(--glass-border); border-radius:14px; font-size:12px; color:var(--text-dim); }
+  .legend-item{ display:flex; align-items:center; gap:8px; }
+  .legend-arrow{ width:26px; height:12px; flex:none; display:inline-block; background-size:contain; background-repeat:no-repeat; background-position:center; }
+  .legend-arrow.soft{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 12'%3E%3Cpath d='M1 9 Q10 2 24 6' stroke='%2335e7ff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M19 3 L24 6 L19 9' stroke='%2335e7ff' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+  .legend-arrow.hard{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 12'%3E%3Cpath d='M1 10 L9 2 L15 9 L24 1' stroke='%23ff3ea5' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M18 1 L24 1 L24 6' stroke='%23ff3ea5' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+  .legend-arrow.neutral{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 12'%3E%3Cline x1='1' y1='6' x2='24' y2='6' stroke='%239490b0' stroke-width='2' stroke-dasharray='3,3' stroke-linecap='round'/%3E%3C/svg%3E"); }
+
+  .mapping-list{ margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+  .mapping-row{ display:flex; align-items:center; gap:12px; padding:12px 14px; background:var(--glass); border:1px solid var(--glass-border); border-radius:14px; flex-wrap:wrap; }
+  .mapping-swatch{ width:32px; height:32px; border-radius:9px; border:1px solid var(--glass-border); flex:none; }
+  .mapping-hex{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--text-dim); min-width:62px; }
+  .mapping-arrow-wrap{ flex:0 0 auto; width:90px; display:flex; align-items:center; justify-content:center; }
+  .mapping-arrow{ width:100%; height:26px; }
+  .mapping-badge{ font-family:'JetBrains Mono', monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; padding:4px 10px; border-radius:999px; flex:none; white-space:nowrap; }
+  .mapping-badge.soft{ background:rgba(53,231,255,0.14); color:var(--accent-b); }
+  .mapping-badge.hard{ background:rgba(255,62,165,0.16); color:var(--accent-a); }
+  .mapping-badge.neutral{ background:rgba(148,144,176,0.16); color:var(--text-dim); }
+  .mapping-count{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--text-dim); margin-left:auto; flex:none; }
+
+  .lottie-preview-row{ display:none; margin-top:26px; gap:20px; flex-wrap:wrap; }
+  .lottie-preview-row.active{ display:flex; }
+  .lottie-preview-box{ flex:1 1 220px; background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; padding:14px; text-align:center; }
+  .lottie-preview-label{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:10px; }
+  .lottie-canvas{ width:100%; height:220px; display:flex; align-items:center; justify-content:center; }
+  .lottie-canvas svg, .lottie-canvas canvas{ max-width:100%; max-height:100%; }
+
   .drop-zone{
     border:1.5px dashed var(--glass-border); border-radius:16px; padding:34px; text-align:center;
     color:var(--text-dim); font-size:0.92rem; cursor:pointer; transition:border-color 0.2s ease, background 0.2s ease;
@@ -408,6 +439,7 @@
     <a href="#studio-panel">Studio</a>
     <a href="#palette-panel">Palette</a>
     <a href="#image-panel">Image</a>
+    <a href="#lottie-panel">Lottie</a>
     <a href="#theme-panel">Theme</a>
   </div>
 </nav>
@@ -595,11 +627,79 @@
     </div>
   </section>
 
+  <!-- ================= LOTTIE / TGS COLOUR ADAPTER ================= -->
+  <section class="panel" id="lottie-panel">
+    <div class="panel-head">
+      <div>
+        <div class="panel-title"><span class="panel-num">04</span> Lottie / TGS Colour Adapter</div>
+        <div class="panel-desc">Import a Lottie <code>.json</code> or Telegram <code>.tgs</code> sticker. Drop in one target colour and every fill, stroke, gradient stop, and solid-colour layer adapts around it — every colour in the file moves at least a little, not just some. Vivid colours stay close to their own character; near-grey or outline colours pick up a visible tint too, scaled by "Adapt strength". Each swatch gets an arrow showing how far it actually had to move, worked out from the real before/after colour difference.</div>
+      </div>
+    </div>
+
+    <div class="drop-zone" id="lottie-drop-zone">
+      <strong>Tap to upload</strong> or drag a .json / .tgs file here — parsed entirely in your browser, nothing is uploaded anywhere.
+      <input type="file" id="lottie-input" accept=".json,.tgs,application/json" style="display:none;">
+    </div>
+
+    <div class="lottie-stage" id="lottie-stage">
+
+      <div class="lottie-meta" id="lottie-meta"></div>
+
+      <div class="controls" style="margin-top:18px;">
+        <div class="field">
+          <label>Target colour</label>
+          <div class="color-input-row">
+            <button type="button" class="swatch-trigger" id="lottie-target" aria-label="Pick target color" style="background-color:#FF3EA5;"></button>
+            <input type="text" class="hex-text" id="lottie-target-text" value="#FF3EA5" maxlength="7">
+          </div>
+        </div>
+        <div class="field">
+          <label for="lottie-mode">Adapt strength</label>
+          <select id="lottie-mode">
+            <option value="subtle">Subtle tint</option>
+            <option value="balanced" selected>Balanced</option>
+            <option value="strong">Strong match</option>
+          </select>
+        </div>
+        <button class="btn" id="lottie-adapt-btn">Auto-adapt colours</button>
+      </div>
+
+      <div class="lottie-legend">
+        <span class="legend-item"><span class="legend-arrow soft"></span> Soft adaptive — small move, keeps its own hue/tint (e.g. becomes a dark tinted shade, not flat black)</span>
+        <span class="legend-item"><span class="legend-arrow hard"></span> Hard adaptive — big move, gets pulled hard toward the target and loses most of its own colour</span>
+        <span class="legend-item"><span class="legend-arrow neutral"></span> Neutral — already close to the target, barely changes</span>
+      </div>
+
+      <div class="swatches-toolbar" style="margin-top:22px;">
+        <span class="vibe-name"><span class="spark">✦</span> Original → adapted mapping</span>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn ghost small-btn" id="lottie-copy-all">Copy new hex list</button>
+          <button class="btn ghost small-btn" id="lottie-download-json">Download .json</button>
+          <button class="btn ghost small-btn" id="lottie-download-tgs" style="display:none;">Download .tgs</button>
+        </div>
+      </div>
+
+      <div class="mapping-list" id="lottie-mapping-list"></div>
+
+      <div class="lottie-preview-row" id="lottie-preview-row">
+        <div class="lottie-preview-box">
+          <div class="lottie-preview-label">Original</div>
+          <div class="lottie-canvas" id="lottie-canvas-original"></div>
+        </div>
+        <div class="lottie-preview-box">
+          <div class="lottie-preview-label">Adapted</div>
+          <div class="lottie-canvas" id="lottie-canvas-adapted"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- ================= THEME ================= -->
   <section class="panel" id="theme-panel">
     <div class="panel-head">
       <div>
-        <div class="panel-title"><span class="panel-num">04</span> Studio Theme</div>
+        <div class="panel-title"><span class="panel-num">05</span> Studio Theme</div>
         <div class="panel-desc">Not feeling magenta/cyan? Recolor Palette Forge's own accent to match whatever you're designing right now.</div>
       </div>
     </div>
@@ -639,6 +739,9 @@
 <div id="toast"><span class="dot"></span><span id="toast-text">Copied #FFFFFF</span></div>
 
 <footer>MagicMall Colour Forge — built for pulling colour codes straight into your designs.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
 <script>
 (function(){
@@ -1305,6 +1408,367 @@
     applyTheme();
   });
 
+  /* ================= Lottie / TGS Colour Adapter ================= */
+  const lottieDropZone   = document.getElementById('lottie-drop-zone');
+  const lottieFileInput  = document.getElementById('lottie-input');
+  const lottieStage      = document.getElementById('lottie-stage');
+  const lottieMetaEl     = document.getElementById('lottie-meta');
+  const lottieMappingList= document.getElementById('lottie-mapping-list');
+  const lottieAdaptBtn   = document.getElementById('lottie-adapt-btn');
+  const lottieModeSelect = document.getElementById('lottie-mode');
+  const lottieCopyAllBtn = document.getElementById('lottie-copy-all');
+  const lottieDlJsonBtn  = document.getElementById('lottie-download-json');
+  const lottieDlTgsBtn   = document.getElementById('lottie-download-tgs');
+  const lottiePreviewRow = document.getElementById('lottie-preview-row');
+  const lottieCanvasOrig = document.getElementById('lottie-canvas-original');
+  const lottieCanvasAdapt= document.getElementById('lottie-canvas-adapted');
+
+  let lottieState = null;       // { json, filename, isTgs, colorEntries:[{hex,r,g,b,count,refs:[]}] }
+  let lottieAnimOriginal = null, lottieAnimAdapted = null;
+  let lottieLatestNewColors = [];
+
+  function ldClamp01(v){ return Math.max(0, Math.min(1, v)); }
+  function ldEscapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // Walk the parsed Lottie tree and collect every colour it can find and safely write back to:
+  // solid shape fills/strokes (static + keyframed), gradient fill/stroke stops, and flat-hex
+  // solid-colour layers. Each match is stored as a small "apply(r,g,b)" closure so recolouring
+  // later is just calling every closure — no matter how deeply nested or unusually shaped the
+  // colour data was.
+  function ldWalkColors(node, refs){
+    if(Array.isArray(node)){
+      for(let i=0;i<node.length;i++) ldWalkColors(node[i], refs);
+      return;
+    }
+    if(node && typeof node === 'object'){
+      if((node.ty === 'fl' || node.ty === 'st') && node.c && node.c.k !== undefined){
+        ldRegisterSolidColorProp(node.c, refs);
+      }
+      if((node.ty === 'gf' || node.ty === 'gs') && node.g && node.g.k !== undefined){
+        ldRegisterGradientProp(node.g, refs);
+      }
+      if(node.ty === 1 && typeof node.sc === 'string' && /^#?[0-9a-fA-F]{6}$/.test(node.sc)){
+        ldRegisterHexStringProp(node, 'sc', refs);
+      }
+      for(const key in node){ ldWalkColors(node[key], refs); }
+    }
+  }
+
+  function ldPushColorRef(refs, r, g, b, applyFn){
+    const hex = rgbToHex(Math.round(ldClamp01(r)*255), Math.round(ldClamp01(g)*255), Math.round(ldClamp01(b)*255));
+    let entry = refs.find(e=> e.hex === hex);
+    if(!entry){ entry = { hex, r:ldClamp01(r), g:ldClamp01(g), b:ldClamp01(b), count:0, refs:[] }; refs.push(entry); }
+    entry.count++;
+    entry.refs.push(applyFn);
+  }
+
+  // Static or keyframed solid fill/stroke colour: {"a":0,"k":[r,g,b,a]} or {"a":1,"k":[{s:[..],e:[..]},...]}
+  function ldRegisterSolidColorProp(colorProp, refs){
+    if(colorProp.a === 1 && Array.isArray(colorProp.k)){
+      colorProp.k.forEach(kf=>{
+        if(Array.isArray(kf.s) && kf.s.length >= 3){
+          ldPushColorRef(refs, kf.s[0], kf.s[1], kf.s[2], (r,g,b)=>{ kf.s[0]=r; kf.s[1]=g; kf.s[2]=b; });
+        }
+        if(Array.isArray(kf.e) && kf.e.length >= 3){
+          ldPushColorRef(refs, kf.e[0], kf.e[1], kf.e[2], (r,g,b)=>{ kf.e[0]=r; kf.e[1]=g; kf.e[2]=b; });
+        }
+      });
+    } else if(Array.isArray(colorProp.k) && colorProp.k.length >= 3 && typeof colorProp.k[0] === 'number'){
+      const arr = colorProp.k;
+      ldPushColorRef(refs, arr[0], arr[1], arr[2], (r,g,b)=>{ arr[0]=r; arr[1]=g; arr[2]=b; });
+    }
+  }
+
+  // Gradient colour stops are packed into one flat array: [offset,r,g,b, offset,r,g,b, ...]
+  // for the first `p` entries, optionally followed by separate alpha-stop pairs — untouched here.
+  function ldRegisterGradientStops(flatArr, p, refs){
+    for(let i=0;i<p;i++){
+      const base = i*4;
+      if(base+3 < flatArr.length){
+        ldPushColorRef(refs, flatArr[base+1], flatArr[base+2], flatArr[base+3],
+          (r,g,b)=>{ flatArr[base+1]=r; flatArr[base+2]=g; flatArr[base+3]=b; });
+      }
+    }
+  }
+  function ldRegisterGradientProp(gProp, refs){
+    const p = gProp.p || 0;
+    if(!p) return;
+    if(gProp.k && gProp.k.a === 1 && Array.isArray(gProp.k.k)){
+      gProp.k.k.forEach(kf=>{
+        if(Array.isArray(kf.s)) ldRegisterGradientStops(kf.s, p, refs);
+        if(Array.isArray(kf.e)) ldRegisterGradientStops(kf.e, p, refs);
+      });
+    } else if(gProp.k && Array.isArray(gProp.k.k)){
+      ldRegisterGradientStops(gProp.k.k, p, refs);
+    } else if(Array.isArray(gProp.k)){
+      ldRegisterGradientStops(gProp.k, p, refs);
+    }
+  }
+
+  // Solid-colour layer: a flat "#rrggbb" string sitting directly on the layer object.
+  function ldRegisterHexStringProp(obj, key, refs){
+    let hexStr = obj[key];
+    if(!hexStr.startsWith('#')) hexStr = '#'+hexStr;
+    const rgb = hexToRgb(hexStr);
+    ldPushColorRef(refs, rgb.r/255, rgb.g/255, rgb.b/255,
+      (r,g,b)=>{ obj[key] = rgbToHex(Math.round(r*255), Math.round(g*255), Math.round(b*255)); });
+  }
+
+  function ldHandleFile(file){
+    const name = file.name || 'sticker.json';
+    const isTgs = /\.tgs$/i.test(name);
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        let jsonText;
+        if(isTgs){
+          if(typeof pako === 'undefined'){ showToast('Gzip library failed to load — check your connection'); return; }
+          jsonText = pako.inflate(new Uint8Array(e.target.result), { to:'string' });
+        } else {
+          jsonText = e.target.result;
+        }
+        const json = JSON.parse(jsonText);
+        if(!json || typeof json !== 'object' || (!json.layers && !json.assets)){
+          throw new Error('not a lottie file');
+        }
+        ldLoadJson(json, name, isTgs);
+      } catch(err){
+        showToast("Couldn't read that — is it a valid Lottie JSON or TGS sticker?");
+      }
+    };
+    if(isTgs){ reader.readAsArrayBuffer(file); } else { reader.readAsText(file); }
+  }
+
+  function ldLoadJson(json, filename, isTgs){
+    const refs = [];
+    ldWalkColors(json, refs);
+    refs.sort((a,b)=> b.count - a.count);
+    lottieState = { json, filename, isTgs, colorEntries: refs };
+    lottieLatestNewColors = [];
+    lottieDlTgsBtn.style.display = isTgs ? 'inline-flex' : 'none';
+    lottieStage.classList.add('active');
+    lottiePreviewRow.classList.remove('active');
+    const frames = Math.max(0, Math.round((json.op||0) - (json.ip||0)));
+    lottieMetaEl.innerHTML =
+      `<span><b>${ldEscapeHtml(filename)}</b></span>` +
+      `<span>${json.w||'?'}×${json.h||'?'}px</span>` +
+      `<span>${frames} frames</span>` +
+      `<span><b>${refs.length}</b> distinct fill/stroke colour${refs.length===1?'':'s'} found</span>`;
+    ldRenderMappingList(null);
+    if(typeof lottie !== 'undefined'){
+      ldRenderPreview('original', json);
+      lottiePreviewRow.classList.add('active');
+    }
+    showToast(refs.length ? `Loaded ${refs.length} colours from ${filename}` : `Loaded ${filename} — no flat fill/stroke colours found`);
+  }
+
+  function ldRenderPreview(which, json){
+    if(typeof lottie === 'undefined') return;
+    const target = which === 'original' ? lottieCanvasOrig : lottieCanvasAdapt;
+    if(which === 'original' && lottieAnimOriginal){ lottieAnimOriginal.destroy(); lottieAnimOriginal = null; }
+    if(which === 'adapted' && lottieAnimAdapted){ lottieAnimAdapted.destroy(); lottieAnimAdapted = null; }
+    target.innerHTML = '';
+    try{
+      const anim = lottie.loadAnimation({
+        container: target,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        animationData: JSON.parse(JSON.stringify(json))
+      });
+      if(which === 'original') lottieAnimOriginal = anim; else lottieAnimAdapted = anim;
+    } catch(err){ /* preview is a bonus, ignore failures */ }
+  }
+
+  // Soft / hard / neutral classification based on the ACTUAL colour difference between the
+  // original swatch and its adapted replacement (a redmean RGB distance, 0-100%). This works the
+  // same way no matter whether the target is vivid or black/white/grey, because it measures the
+  // real visible result rather than guessing from hue math beforehand.
+  function ldColorDistancePct(hex1, hex2){
+    const c1 = hexToRgb(hex1), c2 = hexToRgb(hex2);
+    const rmean = (c1.r + c2.r) / 2;
+    const dr = c1.r - c2.r, dg = c1.g - c2.g, db = c1.b - c2.b;
+    const dist = Math.sqrt((2 + rmean/256)*dr*dr + 4*dg*dg + (2 + (255-rmean)/256)*db*db);
+    return (dist / 764) * 100; // ~0-100, 764 ≈ max possible distance (black to white)
+  }
+  function ldClassifyByDistance(pct){
+    if(pct < 8) return { kind:'neutral', magnitude:0 };
+    if(pct <= 35) return { kind:'soft', magnitude: Math.min(1, (pct-8)/27) };
+    return { kind:'hard', magnitude: Math.min(1, (pct-35)/40) };
+  }
+
+  function ldBuildArrowSvg(kind, magnitude){
+    const mag = Math.max(0, Math.min(1, magnitude||0));
+    if(kind === 'neutral'){
+      return `<svg viewBox="0 0 90 28" class="mapping-arrow"><line x1="4" y1="14" x2="78" y2="14" stroke="#9490b0" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round"/><path d="M72 8 L84 14 L72 20" stroke="#9490b0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    }
+    if(kind === 'soft'){
+      const dip = 5 + mag*7;
+      return `<svg viewBox="0 0 90 28" class="mapping-arrow"><path d="M4 20 Q 45 ${(20-dip*2).toFixed(1)} 78 14" stroke="#35e7ff" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M70 7 L84 14 L70 21" stroke="#35e7ff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    }
+    const amp = 6 + mag*8;
+    return `<svg viewBox="0 0 90 28" class="mapping-arrow"><path d="M4 20 L28 ${(14-amp).toFixed(1)} L50 ${(14+amp).toFixed(1)} L78 14" stroke="#ff3ea5" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M68 5 L84 14 L68 23" stroke="#ff3ea5" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  function ldRenderMappingList(newColorsMap){
+    lottieMappingList.innerHTML = '';
+    if(!lottieState || !lottieState.colorEntries.length){
+      const note = document.createElement('div');
+      note.className = 'empty-note';
+      note.textContent = 'No fill, stroke, gradient, or solid-layer colours detected in this file yet.';
+      lottieMappingList.appendChild(note);
+      return;
+    }
+    lottieState.colorEntries.forEach(entry=>{
+      const row = document.createElement('div');
+      row.className = 'mapping-row';
+
+      const origSw = document.createElement('div');
+      origSw.className = 'mapping-swatch';
+      origSw.style.background = entry.hex;
+      origSw.title = entry.hex;
+      row.appendChild(origSw);
+
+      const origHex = document.createElement('div');
+      origHex.className = 'mapping-hex';
+      origHex.textContent = entry.hex;
+      row.appendChild(origHex);
+
+      if(newColorsMap){
+        const info = newColorsMap.get(entry.hex);
+        const arrowWrap = document.createElement('div');
+        arrowWrap.className = 'mapping-arrow-wrap';
+        arrowWrap.innerHTML = ldBuildArrowSvg(info.kind, info.magnitude);
+        row.appendChild(arrowWrap);
+
+        const newSw = document.createElement('div');
+        newSw.className = 'mapping-swatch';
+        newSw.style.background = info.hex;
+        newSw.title = info.hex;
+        row.appendChild(newSw);
+
+        const newHex = document.createElement('div');
+        newHex.className = 'mapping-hex';
+        newHex.textContent = info.hex;
+        row.appendChild(newHex);
+
+        const badge = document.createElement('span');
+        badge.className = 'mapping-badge ' + info.kind;
+        badge.textContent = info.kind === 'soft' ? 'Soft adapt' : info.kind === 'hard' ? 'Hard adapt' : 'Neutral';
+        row.appendChild(badge);
+      }
+
+      const count = document.createElement('span');
+      count.className = 'mapping-count';
+      count.textContent = '×' + entry.count;
+      row.appendChild(count);
+
+      lottieMappingList.appendChild(row);
+    });
+  }
+
+  function ldApplyColorsToJson(newColorsMap){
+    lottieState.colorEntries.forEach(entry=>{
+      const info = newColorsMap.get(entry.hex);
+      const rgb = hexToRgb(info.hex);
+      const r = rgb.r/255, g = rgb.g/255, b = rgb.b/255;
+      entry.refs.forEach(applyFn=> applyFn(r, g, b));
+    });
+  }
+
+  const LD_STRENGTH_PRESETS = {
+    subtle:   { lightBlend:0.35, satFloor:0.20, satRange:0.40 },
+    balanced: { lightBlend:0.60, satFloor:0.35, satRange:0.65 },
+    strong:   { lightBlend:0.85, satFloor:0.55, satRange:0.45 }
+  };
+
+  function ldRunAdapt(){
+    if(!lottieState){ showToast('Import a Lottie JSON or TGS file first'); return; }
+    if(!lottieState.colorEntries.length){ showToast('No colours were found in this file'); return; }
+    const targetHex = normalizeHexInput(document.getElementById('lottie-target-text').value) || lottieTarget.value;
+    if(!targetHex){ showToast('Enter a valid hex colour first'); return; }
+
+    const preset = LD_STRENGTH_PRESETS[lottieModeSelect.value] || LD_STRENGTH_PRESETS.balanced;
+    const targetRgb = hexToRgb(targetHex);
+    const targetHsl = rgbToHsl(targetRgb.r, targetRgb.g, targetRgb.b);
+
+    const newColorsMap = new Map();
+    lottieState.colorEntries.forEach(entry=>{
+      const r255 = Math.round(entry.r*255), g255 = Math.round(entry.g*255), b255 = Math.round(entry.b*255);
+      const hsl = rgbToHsl(r255, g255, b255);
+
+      // Every swatch adopts the target's hue family — this is what makes ALL of them move, even
+      // flat greys/blacks/whites that a pure hue-rotation would have nothing to act on. How much
+      // saturation it takes on scales with how saturated it originally was (vivid stays vivid-ish,
+      // near-neutral picks up a gentler tint), and lightness blends toward the target while keeping
+      // some of the original shading so the design doesn't flatten into one flat colour.
+      const newS = targetHsl.s * (preset.satFloor + preset.satRange * (hsl.s/100));
+      const newL = hsl.l + (targetHsl.l - hsl.l) * preset.lightBlend;
+      const candidateHex = hexFromHsl(targetHsl.h, newS, newL);
+
+      // Classify from the ACTUAL resulting colour difference, not from the formula that produced
+      // it — this is what correctly separates "barely changed" from "soft tint" from "hard shift"
+      // for every kind of target, vivid or achromatic, without special-casing either one.
+      const distPct = ldColorDistancePct(entry.hex, candidateHex);
+      const cls = ldClassifyByDistance(distPct);
+      const newHex = cls.kind === 'neutral' ? entry.hex : candidateHex;
+
+      newColorsMap.set(entry.hex, { hex:newHex, kind:cls.kind, magnitude:cls.magnitude });
+    });
+
+    lottieLatestNewColors = lottieState.colorEntries.map(e=> newColorsMap.get(e.hex).hex);
+    ldRenderMappingList(newColorsMap);
+    ldApplyColorsToJson(newColorsMap);
+    if(typeof lottie !== 'undefined'){
+      ldRenderPreview('adapted', lottieState.json);
+      lottiePreviewRow.classList.add('active');
+    }
+    showToast(`Adapted ${lottieState.colorEntries.length} colours around ${targetHex}`);
+  }
+
+  function ldDownload(content, filename, mime){
+    const blob = new Blob([content], { type:mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=> URL.revokeObjectURL(url), 4000);
+  }
+
+  lottieDropZone.addEventListener('click', ()=> lottieFileInput.click());
+  lottieFileInput.addEventListener('change', ()=>{ if(lottieFileInput.files[0]) ldHandleFile(lottieFileInput.files[0]); });
+  ['dragover','dragenter'].forEach(ev=> lottieDropZone.addEventListener(ev, e=>{ e.preventDefault(); lottieDropZone.classList.add('drag'); }));
+  ['dragleave'].forEach(ev=> lottieDropZone.addEventListener(ev, e=>{ e.preventDefault(); lottieDropZone.classList.remove('drag'); }));
+  lottieDropZone.addEventListener('drop', e=>{
+    e.preventDefault();
+    lottieDropZone.classList.remove('drag');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(f) ldHandleFile(f);
+  });
+
+  lottieAdaptBtn.addEventListener('click', ldRunAdapt);
+
+  lottieCopyAllBtn.addEventListener('click', ()=>{
+    if(!lottieLatestNewColors.length){ showToast('Run Auto-adapt first'); return; }
+    copyToClipboard(lottieLatestNewColors.join('\n'), `Copied ${lottieLatestNewColors.length} hex codes`);
+  });
+
+  lottieDlJsonBtn.addEventListener('click', ()=>{
+    if(!lottieState){ showToast('Import a file first'); return; }
+    const base = lottieState.filename.replace(/\.(json|tgs)$/i,'');
+    ldDownload(JSON.stringify(lottieState.json), base + '-adapted.json', 'application/json');
+  });
+
+  lottieDlTgsBtn.addEventListener('click', ()=>{
+    if(!lottieState){ return; }
+    if(typeof pako === 'undefined'){ showToast('Gzip library unavailable'); return; }
+    const base = lottieState.filename.replace(/\.(json|tgs)$/i,'');
+    const gz = pako.gzip(JSON.stringify(lottieState.json));
+    ldDownload(gz, base + '-adapted.tgs', 'application/gzip');
+  });
+
   /* ================= Marquee build (always moving) ================= */
   const marqueeTrack = document.getElementById('marquee-track');
   function buildMarquee(){
@@ -1327,6 +1791,7 @@
   const gradColor1 = ColorControl('grad-color1','grad-color1-text','#FF3EA5', ()=> buildGradient());
   const gradColor2 = ColorControl('grad-color2','grad-color2-text','#35E7FF', ()=> buildGradient());
   const palBase = ColorControl('pal-base','pal-base-text','#8B5CF6', ()=> buildPalette());
+  const lottieTarget = ColorControl('lottie-target','lottie-target-text','#FF3EA5', ()=>{ if(lottieState) ldRunAdapt(); });
   const themeA = ColorControl('theme-a', null, '#FF3EA5', applyTheme);
   const themeB = ColorControl('theme-b', null, '#35E7FF', applyTheme);
 
