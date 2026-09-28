@@ -6,6 +6,7 @@
 <title>MagicMall Colour Forge — Colour Code Generator</title>
 <meta name="description" content="MagicMall's colour code generator: pick solid colours, build gradients, generate palettes, and lift colours from an image — tap any swatch to reveal, tap again to copy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -321,11 +322,12 @@
   .mapping-badge.neutral{ background:rgba(148,144,176,0.16); color:var(--text-dim); }
   .mapping-count{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--text-dim); margin-left:auto; flex:none; }
 
-  .lottie-preview-row{ display:none; margin-top:26px; gap:20px; flex-wrap:wrap; }
+  .lottie-preview-row{ display:none; margin:18px 0 4px; gap:20px; flex-wrap:wrap; }
   .lottie-preview-row.active{ display:flex; }
   .lottie-preview-box{ flex:1 1 220px; background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; padding:14px; text-align:center; }
   .lottie-preview-label{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:10px; }
   .lottie-canvas{ width:100%; height:220px; display:flex; align-items:center; justify-content:center; }
+  .lottie-canvas:empty::before{ content:'Press Auto-adapt to see the result'; color:var(--text-dim); font-family:'JetBrains Mono',monospace; font-size:12px; }
   .lottie-canvas svg, .lottie-canvas canvas{ max-width:100%; max-height:100%; }
 
   .drop-zone{
@@ -357,6 +359,55 @@
   .current-pick .swatch{ width:64px; height:64px; flex-shrink:0; }
   .current-pick .info{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--text-dim); }
   .current-pick .info b{ display:block; color:var(--text); font-size:16px; margin-bottom:2px; }
+
+  /* ---------- Lottie: lock (keep original) colour chips ---------- */
+  .lock-panel{ margin-top:22px; padding:16px 18px; background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; }
+  .lock-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+  .lock-title{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; }
+  .lock-sub{ font-size:12.5px; color:var(--text-dim); margin-bottom:14px; }
+  .lock-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .lock-chips{ display:grid; grid-template-columns:repeat(auto-fill, minmax(92px,1fr)); gap:10px; }
+  .lock-chip{
+    position:relative; display:flex; flex-direction:column; align-items:center; gap:6px;
+    padding:10px 8px 8px; border-radius:14px; cursor:pointer; color:var(--text);
+    background:rgba(255,255,255,0.04); border:1px solid var(--glass-border);
+    transition:transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+  }
+  .lock-chip:hover{ transform:translateY(-3px); }
+  .lock-chip .lc-box{
+    width:100%; height:44px; border-radius:10px; background:var(--c);
+    border:1px solid rgba(255,255,255,0.25); box-shadow:inset 0 0 0 1px rgba(0,0,0,0.15);
+  }
+  .lock-chip .lc-hex{ font-family:'JetBrains Mono',monospace; font-size:11px; }
+  .lock-chip .lc-count{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); }
+  .lock-chip .lc-badge{
+    position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:11px;
+    background:var(--accent-mix); transform:scale(0); transition:transform .22s cubic-bezier(.2,.8,.2,1);
+  }
+  .lock-chip.locked{ border-color:var(--accent-b); background:rgba(53,231,255,0.08); box-shadow:0 8px 22px rgba(53,231,255,0.15); }
+  .lock-chip.locked .lc-badge{ transform:scale(1); }
+  .mapping-badge.locked{ background:rgba(255,255,255,0.12); color:var(--text); display:inline-flex; align-items:center; gap:5px; }
+  .ic{ width:1em; height:1em; flex:none; vertical-align:-0.14em; }
+  .lock-title{ display:inline-flex; align-items:center; gap:8px; }
+  .lock-title .ic{ width:17px; height:17px; }
+  .lock-sub .ic{ width:12px; height:12px; }
+  .lock-chip .lc-badge{ color:#0a0a0f; }
+  .lock-chip .lc-badge .ic{ width:12px; height:12px; stroke-width:2.4; }
+
+  .target-list{ display:flex; flex-direction:column; gap:8px; }
+  .target-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .target-num{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); width:14px; text-align:center; }
+  .target-hint{ display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); }
+  .target-hint i{ width:12px; height:12px; border-radius:4px; border:1px solid rgba(255,255,255,0.3); display:inline-block; }
+  .icon-btn{ width:34px; height:34px; border-radius:10px; border:1px solid var(--glass-border); background:transparent; color:var(--text-dim); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:color .2s ease, border-color .2s ease; }
+  .icon-btn:hover{ color:var(--text); border-color:var(--accent-b); }
+  .icon-btn svg{ width:16px; height:16px; }
+  .target-add{ align-self:flex-start; display:inline-flex; align-items:center; gap:7px; }
+  .target-add svg{ width:14px; height:14px; }
+  .mapping-badge.custom{ background:rgba(255,255,255,0.12); color:var(--text); }
+  .mapping-swatch.editable{ cursor:pointer; transition:transform .18s ease, border-color .18s ease; }
+  .mapping-swatch.editable:hover{ transform:scale(1.12); border-color:var(--accent-b); }
 
   /* ---------- Theme ---------- */
   .theme-row{ display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
@@ -465,12 +516,12 @@
   <section class="panel" id="studio-panel">
     <div class="panel-head">
       <div>
-        <div class="panel-title"><span class="panel-num">01</span> Color Studio</div>
-        <div class="panel-desc">Start with one solid color and get its full tint/shade/tone chart, or tap Gradient to blend two colors into a ramp.</div>
+        <div class="panel-title"><span class="panel-num">01</span> Colour Studio</div>
+        <div class="panel-desc">Start with one solid colour and get its full tint/shade/tone chart, or tap Gradient to blend two colours into a ramp.</div>
       </div>
     </div>
 
-    <div class="tabbar" role="tablist" aria-label="Color mode">
+    <div class="tabbar" role="tablist" aria-label="Colour mode">
       <span class="tab-indicator" id="tab-indicator"></span>
       <button class="tab-btn active" id="tab-solid-btn" role="tab" aria-selected="true">Solid</button>
       <button class="tab-btn" id="tab-gradient-btn" role="tab" aria-selected="false">Gradient</button>
@@ -480,9 +531,9 @@
     <div class="tab-panel active" id="tab-solid">
       <div class="controls">
         <div class="field">
-          <label>Color</label>
+          <label>Colour</label>
           <div class="color-input-row">
-            <button type="button" class="swatch-trigger" id="solid-color" aria-label="Pick color" style="background-color:#FF3EA5;"></button>
+            <button type="button" class="swatch-trigger" id="solid-color" aria-label="Pick colour" style="background-color:#FF3EA5;"></button>
             <input type="text" class="hex-text" id="solid-color-text" value="#FF3EA5" maxlength="7">
           </div>
         </div>
@@ -490,7 +541,7 @@
           <label for="chart-count">Chart steps</label>
           <input type="number" id="chart-count" min="4" max="12" value="8">
         </div>
-        <button class="btn" id="solid-generate">Build color chart</button>
+        <button class="btn" id="solid-generate">Build colour chart</button>
       </div>
 
       <div class="solid-preview-wrap">
@@ -517,16 +568,16 @@
     <div class="tab-panel" id="tab-gradient">
       <div class="controls">
         <div class="field">
-          <label>Color 1</label>
+          <label>Colour 1</label>
           <div class="color-input-row">
-            <button type="button" class="swatch-trigger" id="grad-color1" aria-label="Pick color 1" style="background-color:#FF3EA5;"></button>
+            <button type="button" class="swatch-trigger" id="grad-color1" aria-label="Pick colour 1" style="background-color:#FF3EA5;"></button>
             <input type="text" class="hex-text" id="grad-color1-text" value="#FF3EA5" maxlength="7">
           </div>
         </div>
         <div class="field">
-          <label>Color 2</label>
+          <label>Colour 2</label>
           <div class="color-input-row">
-            <button type="button" class="swatch-trigger" id="grad-color2" aria-label="Pick color 2" style="background-color:#35E7FF;"></button>
+            <button type="button" class="swatch-trigger" id="grad-color2" aria-label="Pick colour 2" style="background-color:#35E7FF;"></button>
             <input type="text" class="hex-text" id="grad-color2-text" value="#35E7FF" maxlength="7">
           </div>
         </div>
@@ -551,15 +602,15 @@
     <div class="panel-head">
       <div>
         <div class="panel-title"><span class="panel-num">02</span> Palette Generator</div>
-        <div class="panel-desc">Start from one base color, choose how the rest should relate to it, and set how many swatches you need.</div>
+        <div class="panel-desc">Start from one base colour, choose how the rest should relate to it, and set how many swatches you need.</div>
       </div>
     </div>
 
     <div class="controls">
       <div class="field">
-        <label>Base color</label>
+        <label>Base colour</label>
         <div class="color-input-row">
-          <button type="button" class="swatch-trigger" id="pal-base" aria-label="Pick base color" style="background-color:#8B5CF6;"></button>
+          <button type="button" class="swatch-trigger" id="pal-base" aria-label="Pick base colour" style="background-color:#8B5CF6;"></button>
           <input type="text" class="hex-text" id="pal-base-text" value="#8B5CF6" maxlength="7">
         </div>
       </div>
@@ -592,8 +643,8 @@
   <section class="panel" id="image-panel">
     <div class="panel-head">
       <div>
-        <div class="panel-title"><span class="panel-num">03</span> Image Color Picker</div>
-        <div class="panel-desc">Upload an image, drag your finger or cursor across it to sample any pixel, or auto-extract its dominant colors.</div>
+        <div class="panel-title"><span class="panel-num">03</span> Image Colour Picker</div>
+        <div class="panel-desc">Upload an image, drag your finger or cursor across it to sample any pixel, or auto-extract its dominant colours.</div>
       </div>
     </div>
 
@@ -632,7 +683,7 @@
     <div class="panel-head">
       <div>
         <div class="panel-title"><span class="panel-num">04</span> Lottie / TGS Colour Adapter</div>
-        <div class="panel-desc">Import a Lottie <code>.json</code> or Telegram <code>.tgs</code> sticker. Drop in one target colour and every fill, stroke, gradient stop, and solid-colour layer adapts around it — every colour in the file moves at least a little, not just some. Vivid colours stay close to their own character; near-grey or outline colours pick up a visible tint too, scaled by "Adapt strength". Each swatch gets an arrow showing how far it actually had to move, worked out from the real before/after colour difference.</div>
+        <div class="panel-desc">Import a Lottie <code>.json</code> or Telegram <code>.tgs</code> sticker and pick one or more target colours. In “Keep harmony” mode your first target replaces the design's main colour, the second replaces its next distinct colour, and so on; every remaining colour follows its nearest one, so relationships and contrast survive; “Monochrome” pushes everything to one hue. Black, white and grey stay untouched by default. Lock any colour to keep it original, or tap an adapted swatch to set your own.</div>
       </div>
     </div>
 
@@ -645,13 +696,35 @@
 
       <div class="lottie-meta" id="lottie-meta"></div>
 
+      <div class="lottie-preview-row" id="lottie-preview-row">
+        <div class="lottie-preview-box">
+          <div class="lottie-preview-label">Original</div>
+          <div class="lottie-canvas" id="lottie-canvas-original"></div>
+        </div>
+        <div class="lottie-preview-box">
+          <div class="lottie-preview-label">Adapted</div>
+          <div class="lottie-canvas" id="lottie-canvas-adapted"></div>
+        </div>
+      </div>
+
+      <div class="lock-panel">
+        <div class="lock-head">
+          <span class="lock-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 2-2 0-1.4-1-1.8-1-3 0-1.2 1-2 2.2-2H17a4 4 0 0 0 4-4c0-3.9-4-7-9-7z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg> Design colours <span id="lock-count" style="color:var(--text-dim);font-weight:400;font-size:12px;"></span></span>
+          <div class="lock-actions">
+            <button class="btn ghost small-btn" id="lock-neutrals">Lock black/white/grey</button>
+            <button class="btn ghost small-btn" id="lock-invert">Invert</button>
+            <button class="btn ghost small-btn" id="lock-all">Lock all</button>
+            <button class="btn ghost small-btn" id="lock-none">Unlock all</button>
+          </div>
+        </div>
+        <div class="lock-sub">Tap a colour to keep it original (<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>). Locked colours won't change when you adapt.</div>
+        <div class="lock-chips" id="lock-chips"></div>
+      </div>
+
       <div class="controls" style="margin-top:18px;">
         <div class="field">
-          <label>Target colour</label>
-          <div class="color-input-row">
-            <button type="button" class="swatch-trigger" id="lottie-target" aria-label="Pick target color" style="background-color:#FF3EA5;"></button>
-            <input type="text" class="hex-text" id="lottie-target-text" value="#FF3EA5" maxlength="7">
-          </div>
+          <label>Target colours</label>
+          <div class="target-list" id="lottie-targets"></div>
         </div>
         <div class="field">
           <label for="lottie-mode">Adapt strength</label>
@@ -661,13 +734,28 @@
             <option value="strong">Strong match</option>
           </select>
         </div>
+        <div class="field">
+          <label for="lottie-harmony">Colour mode</label>
+          <select id="lottie-harmony">
+            <option value="harmony" selected>Keep harmony</option>
+            <option value="mono">Monochrome (one hue)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="lottie-neutrals">Black / white / grey</label>
+          <select id="lottie-neutrals">
+            <option value="keep" selected>Keep as original</option>
+            <option value="tint">Add a light tint</option>
+          </select>
+        </div>
         <button class="btn" id="lottie-adapt-btn">Auto-adapt colours</button>
+        <button class="btn ghost" id="lottie-reset-btn">Reset to original</button>
       </div>
 
       <div class="lottie-legend">
         <span class="legend-item"><span class="legend-arrow soft"></span> Soft adaptive — small move, keeps its own hue/tint (e.g. becomes a dark tinted shade, not flat black)</span>
         <span class="legend-item"><span class="legend-arrow hard"></span> Hard adaptive — big move, gets pulled hard toward the target and loses most of its own colour</span>
-        <span class="legend-item"><span class="legend-arrow neutral"></span> Neutral — already close to the target, barely changes</span>
+        <span class="legend-item"><span class="legend-arrow neutral"></span> Neutral — unchanged (grey/black/white kept, or already close to the target)</span>
       </div>
 
       <div class="swatches-toolbar" style="margin-top:22px;">
@@ -681,17 +769,6 @@
 
       <div class="mapping-list" id="lottie-mapping-list"></div>
 
-      <div class="lottie-preview-row" id="lottie-preview-row">
-        <div class="lottie-preview-box">
-          <div class="lottie-preview-label">Original</div>
-          <div class="lottie-canvas" id="lottie-canvas-original"></div>
-        </div>
-        <div class="lottie-preview-box">
-          <div class="lottie-preview-label">Adapted</div>
-          <div class="lottie-canvas" id="lottie-canvas-adapted"></div>
-        </div>
-      </div>
-
     </div>
   </section>
 
@@ -700,7 +777,7 @@
     <div class="panel-head">
       <div>
         <div class="panel-title"><span class="panel-num">05</span> Studio Theme</div>
-        <div class="panel-desc">Not feeling magenta/cyan? Recolor Palette Forge's own accent to match whatever you're designing right now.</div>
+        <div class="panel-desc">Not feeling magenta/cyan? Recolour Colour Forge's own accent to match whatever you're designing right now.</div>
       </div>
     </div>
 
@@ -840,6 +917,41 @@
     return v.toUpperCase();
   }
 
+  /* ================= OKLCH (perceptual) colour math ================= */
+  function s2l(c){ c/=255; return c<=0.04045 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4); }
+  function l2s(c){ c=Math.max(0,Math.min(1,c)); return 255*(c<=0.0031308 ? 12.92*c : 1.055*Math.pow(c,1/2.4)-0.055); }
+  function hexToOklch(hex){
+    const {r,g,b} = hexToRgb(hex);
+    const R=s2l(r), G=s2l(g), B=s2l(b);
+    const l=Math.cbrt(0.4122214708*R+0.5363325363*G+0.0514459929*B);
+    const m=Math.cbrt(0.2119034982*R+0.6806995451*G+0.1073969566*B);
+    const q=Math.cbrt(0.0883024619*R+0.2817188376*G+0.6299787005*B);
+    const L=0.2104542553*l+0.7936177850*m-0.0040720468*q;
+    const a=1.9779984951*l-2.4285922050*m+0.4505937099*q;
+    const bb=0.0259040371*l+0.7827717662*m-0.8086757660*q;
+    return { L, C:Math.hypot(a,bb), h:(Math.atan2(bb,a)*180/Math.PI+360)%360 };
+  }
+  function oklchToLinear(L,C,h){
+    const a=C*Math.cos(h*Math.PI/180), b=C*Math.sin(h*Math.PI/180);
+    const l=Math.pow(L+0.3963377774*a+0.2158037573*b,3);
+    const m=Math.pow(L-0.1055613458*a-0.0638541728*b,3);
+    const q=Math.pow(L-0.0894841775*a-1.2914855480*b,3);
+    return { r:4.0767416621*l-3.3077115913*m+0.2309699292*q,
+             g:-1.2684380046*l+2.6097574011*m-0.3413193965*q,
+             b:-0.0041960863*l-0.7034186147*m+1.7076147010*q };
+  }
+  // Converts to hex; if the colour is outside sRGB it lowers chroma until it fits (keeps hue + lightness).
+  function oklchToHex(L,C,h){
+    L=Math.max(0,Math.min(1,L)); C=Math.max(0,C);
+    let rgb;
+    for(let i=0;i<30;i++){
+      rgb = oklchToLinear(L,C,h);
+      if(rgb.r>=-0.0005&&rgb.r<=1.0005&&rgb.g>=-0.0005&&rgb.g<=1.0005&&rgb.b>=-0.0005&&rgb.b<=1.0005) break;
+      C*=0.92;
+    }
+    return rgbToHex(l2s(rgb.r), l2s(rgb.g), l2s(rgb.b));
+  }
+
   /* ================= Toast / copy ================= */
   const toast = document.getElementById('toast');
   const toastText = document.getElementById('toast-text');
@@ -869,11 +981,17 @@
 
   /* ================= Recently copied strip ================= */
   const recentStrip = document.getElementById('recent-strip');
+  const RECENT_KEY = 'mm-colour-forge-recent';
   let recentColors = [];
+  try{
+    const saved = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    if(Array.isArray(saved)) recentColors = saved.filter(c=> typeof c==='string' && isValidHex(c)).slice(0,12);
+  }catch(e){}
   function pushRecent(hex){
     recentColors = recentColors.filter(c=> c !== hex);
     recentColors.unshift(hex);
     if(recentColors.length > 12) recentColors = recentColors.slice(0,12);
+    try{ localStorage.setItem(RECENT_KEY, JSON.stringify(recentColors)); }catch(e){}
     renderRecentStrip();
   }
   function renderRecentStrip(){
@@ -1426,6 +1544,11 @@
   let lottieState = null;       // { json, filename, isTgs, colorEntries:[{hex,r,g,b,count,refs:[]}] }
   let lottieAnimOriginal = null, lottieAnimAdapted = null;
   let lottieLatestNewColors = [];
+  let lottieLocked = new Set(); // hex codes the user wants kept exactly as original
+  let lottieHasAdapted = false;
+  let lottieOverrides = new Map(); // original hex -> user-chosen replacement hex
+  let lottieAdaptTimer = null;
+  let lottieTargets = ["#FF3EA5"]; // one or more target colours (max 6)
 
   function ldClamp01(v){ return Math.max(0, Math.min(1, v)); }
   function ldEscapeHtml(s){
@@ -1452,6 +1575,13 @@
       if(node.ty === 1 && typeof node.sc === 'string' && /^#?[0-9a-fA-F]{6}$/.test(node.sc)){
         ldRegisterHexStringProp(node, 'sc', refs);
       }
+      if(Array.isArray(node.ef)){
+        node.ef.forEach(eff=>{
+          if(eff && Array.isArray(eff.ef)){
+            eff.ef.forEach(p=>{ if(p && p.ty === 2 && p.v && p.v.k !== undefined) ldRegisterSolidColorProp(p.v, refs); });
+          }
+        });
+      }
       for(const key in node){ ldWalkColors(node[key], refs); }
     }
   }
@@ -1469,15 +1599,18 @@
     if(colorProp.a === 1 && Array.isArray(colorProp.k)){
       colorProp.k.forEach(kf=>{
         if(Array.isArray(kf.s) && kf.s.length >= 3){
-          ldPushColorRef(refs, kf.s[0], kf.s[1], kf.s[2], (r,g,b)=>{ kf.s[0]=r; kf.s[1]=g; kf.s[2]=b; });
+          const sc = Math.max(kf.s[0],kf.s[1],kf.s[2])>1.0001 ? 255 : 1;
+          ldPushColorRef(refs, kf.s[0]/sc, kf.s[1]/sc, kf.s[2]/sc, (r,g,b)=>{ kf.s[0]=r*sc; kf.s[1]=g*sc; kf.s[2]=b*sc; });
         }
         if(Array.isArray(kf.e) && kf.e.length >= 3){
-          ldPushColorRef(refs, kf.e[0], kf.e[1], kf.e[2], (r,g,b)=>{ kf.e[0]=r; kf.e[1]=g; kf.e[2]=b; });
+          const sc = Math.max(kf.e[0],kf.e[1],kf.e[2])>1.0001 ? 255 : 1;
+          ldPushColorRef(refs, kf.e[0]/sc, kf.e[1]/sc, kf.e[2]/sc, (r,g,b)=>{ kf.e[0]=r*sc; kf.e[1]=g*sc; kf.e[2]=b*sc; });
         }
       });
     } else if(Array.isArray(colorProp.k) && colorProp.k.length >= 3 && typeof colorProp.k[0] === 'number'){
       const arr = colorProp.k;
-      ldPushColorRef(refs, arr[0], arr[1], arr[2], (r,g,b)=>{ arr[0]=r; arr[1]=g; arr[2]=b; });
+      const sc = Math.max(arr[0],arr[1],arr[2])>1.0001 ? 255 : 1;
+      ldPushColorRef(refs, arr[0]/sc, arr[1]/sc, arr[2]/sc, (r,g,b)=>{ arr[0]=r*sc; arr[1]=g*sc; arr[2]=b*sc; });
     }
   }
 
@@ -1487,8 +1620,9 @@
     for(let i=0;i<p;i++){
       const base = i*4;
       if(base+3 < flatArr.length){
-        ldPushColorRef(refs, flatArr[base+1], flatArr[base+2], flatArr[base+3],
-          (r,g,b)=>{ flatArr[base+1]=r; flatArr[base+2]=g; flatArr[base+3]=b; });
+        const sc = Math.max(flatArr[base+1],flatArr[base+2],flatArr[base+3])>1.0001 ? 255 : 1;
+        ldPushColorRef(refs, flatArr[base+1]/sc, flatArr[base+2]/sc, flatArr[base+3]/sc,
+          (r,g,b)=>{ flatArr[base+1]=r*sc; flatArr[base+2]=g*sc; flatArr[base+3]=b*sc; });
       }
     }
   }
@@ -1515,6 +1649,44 @@
     ldPushColorRef(refs, rgb.r/255, rgb.g/255, rgb.b/255,
       (r,g,b)=>{ obj[key] = rgbToHex(Math.round(r*255), Math.round(g*255), Math.round(b*255)); });
   }
+
+  /* ---------- Lock (keep original) colour chips ---------- */
+  const LOCK_SVG = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  function ldRenderLockChips(){
+    const box = document.getElementById('lock-chips');
+    const countEl = document.getElementById('lock-count');
+    box.innerHTML = '';
+    if(!lottieState) return;
+    lottieState.colorEntries.forEach(entry=>{
+      const locked = lottieLocked.has(entry.hex);
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'lock-chip' + (locked ? ' locked' : '');
+      chip.style.setProperty('--c', entry.hex);
+      chip.setAttribute('aria-pressed', locked);
+      chip.setAttribute('aria-label', (locked ? 'Unlock ' : 'Keep original ') + entry.hex);
+      chip.innerHTML = `<span class="lc-box"></span><span class="lc-hex">${entry.hex}</span><span class="lc-count">×${entry.count}</span><span class="lc-badge">${LOCK_SVG}</span>`;
+      chip.addEventListener('click', ()=>{
+        if(lottieLocked.has(entry.hex)) lottieLocked.delete(entry.hex); else lottieLocked.add(entry.hex);
+        ldAfterLockChange();
+      });
+      box.appendChild(chip);
+    });
+    countEl.textContent = lottieLocked.size ? `· ${lottieLocked.size} locked` : '';
+  }
+  function ldAfterLockChange(){
+    ldRenderLockChips();
+    if(lottieHasAdapted) ldRunAdapt(true);
+  }
+  document.getElementById('lock-all').addEventListener('click', ()=>{
+    if(!lottieState) return;
+    lottieState.colorEntries.forEach(e=> lottieLocked.add(e.hex));
+    ldAfterLockChange();
+  });
+  document.getElementById('lock-none').addEventListener('click', ()=>{
+    lottieLocked.clear();
+    ldAfterLockChange();
+  });
 
   function ldHandleFile(file){
     const name = file.name || 'sticker.json';
@@ -1545,8 +1717,15 @@
     const refs = [];
     ldWalkColors(json, refs);
     refs.sort((a,b)=> b.count - a.count);
+    refs.forEach(e=>{ e.oklch = hexToOklch(e.hex); e.neutral = e.oklch.C < 0.04; });
     lottieState = { json, filename, isTgs, colorEntries: refs };
     lottieLatestNewColors = [];
+    lottieLocked = new Set();
+    lottieOverrides = new Map();
+    clearTimeout(lottieAdaptTimer);
+    lottieHasAdapted = false;
+    ldRenderLockChips();
+    ldRenderTargets();
     lottieDlTgsBtn.style.display = isTgs ? 'inline-flex' : 'none';
     lottieStage.classList.add('active');
     lottiePreviewRow.classList.remove('active');
@@ -1640,13 +1819,21 @@
         const info = newColorsMap.get(entry.hex);
         const arrowWrap = document.createElement('div');
         arrowWrap.className = 'mapping-arrow-wrap';
-        arrowWrap.innerHTML = ldBuildArrowSvg(info.kind, info.magnitude);
+        arrowWrap.innerHTML = ldBuildArrowSvg(info.arrow || (info.kind === 'locked' ? 'neutral' : info.kind), info.magnitude);
         row.appendChild(arrowWrap);
 
         const newSw = document.createElement('div');
         newSw.className = 'mapping-swatch';
         newSw.style.background = info.hex;
         newSw.title = info.hex;
+        if(info.kind !== 'locked'){
+          newSw.classList.add('editable');
+          newSw.title = info.hex + ' — tap to set your own colour';
+          newSw.addEventListener('click', e=>{
+            e.stopPropagation();
+            openColorPicker(newSw, info.hex, hex=>{ lottieOverrides.set(entry.hex, hex); ldAdaptSoon(); });
+          });
+        }
         row.appendChild(newSw);
 
         const newHex = document.createElement('div');
@@ -1656,8 +1843,15 @@
 
         const badge = document.createElement('span');
         badge.className = 'mapping-badge ' + info.kind;
-        badge.textContent = info.kind === 'soft' ? 'Soft adapt' : info.kind === 'hard' ? 'Hard adapt' : 'Neutral';
+        if(info.kind === 'locked'){ badge.innerHTML = LOCK_SVG + 'Kept'; }
+        else { badge.textContent = info.kind === 'custom' ? 'Custom' : info.kind === 'soft' ? 'Soft adapt' : info.kind === 'hard' ? 'Hard adapt' : 'Neutral'; }
         row.appendChild(badge);
+        if(info.kind === 'custom'){
+          const rb = document.createElement('button');
+          rb.type = 'button'; rb.className = 'btn ghost small-btn'; rb.textContent = 'Auto';
+          rb.addEventListener('click', ()=>{ lottieOverrides.delete(entry.hex); ldRunAdapt(true); });
+          row.appendChild(rb);
+        }
       }
 
       const count = document.createElement('span');
@@ -1672,50 +1866,160 @@
   function ldApplyColorsToJson(newColorsMap){
     lottieState.colorEntries.forEach(entry=>{
       const info = newColorsMap.get(entry.hex);
+      if(info.kind === 'locked' || info.hex === entry.hex){
+        entry.refs.forEach(applyFn=> applyFn(entry.r, entry.g, entry.b)); // exact original
+        return;
+      }
       const rgb = hexToRgb(info.hex);
-      const r = rgb.r/255, g = rgb.g/255, b = rgb.b/255;
-      entry.refs.forEach(applyFn=> applyFn(r, g, b));
+      entry.refs.forEach(applyFn=> applyFn(rgb.r/255, rgb.g/255, rgb.b/255));
     });
   }
 
-  const LD_STRENGTH_PRESETS = {
-    subtle:   { lightBlend:0.35, satFloor:0.20, satRange:0.40 },
-    balanced: { lightBlend:0.60, satFloor:0.35, satRange:0.65 },
-    strong:   { lightBlend:0.85, satFloor:0.55, satRange:0.45 }
-  };
+  const LD_STRENGTH = { subtle:0.55, balanced:0.85, strong:1 };
 
-  function ldRunAdapt(){
-    if(!lottieState){ showToast('Import a Lottie JSON or TGS file first'); return; }
-    if(!lottieState.colorEntries.length){ showToast('No colours were found in this file'); return; }
-    const targetHex = normalizeHexInput(document.getElementById('lottie-target-text').value) || lottieTarget.value;
-    if(!targetHex){ showToast('Enter a valid hex colour first'); return; }
+  function ldAngleDiff(from, to){ return ((to - from) % 360 + 540) % 360 - 180; }
+  function ldAdaptSoon(){ clearTimeout(lottieAdaptTimer); lottieAdaptTimer = setTimeout(()=> ldRunAdapt(true), 150); }
 
-    const preset = LD_STRENGTH_PRESETS[lottieModeSelect.value] || LD_STRENGTH_PRESETS.balanced;
-    const targetRgb = hexToRgb(targetHex);
-    const targetHsl = rgbToHsl(targetRgb.r, targetRgb.g, targetRgb.b);
+  const LD_MAX_TARGETS = 6;
+  const IC_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+  const IC_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+  // Picks up to n "anchor" colours from the design: the most-used vivid colours that are at least 30 degrees apart in hue.
+  function ldPickAnchors(n){
+    const out = [];
+    if(!lottieState) return out;
+    for(const e of lottieState.colorEntries){
+      if(e.neutral) continue;
+      if(out.every(a=> Math.abs(ldAngleDiff(a.oklch.h, e.oklch.h)) >= 30)) out.push(e);
+      if(out.length >= n) break;
+    }
+    return out;
+  }
+
+  function ldTargetsChanged(){ if(lottieState) ldAdaptSoon(); }
+
+  function ldRenderTargets(){
+    const box = document.getElementById('lottie-targets');
+    if(!box) return;
+    box.innerHTML = '';
+    const anchors = ldPickAnchors(lottieTargets.length);
+    lottieTargets.forEach((hex, i)=>{
+      const row = document.createElement('div');
+      row.className = 'target-row';
+
+      const num = document.createElement('span');
+      num.className = 'target-num';
+      num.textContent = i+1;
+      row.appendChild(num);
+
+      const wrap = document.createElement('div');
+      wrap.className = 'color-input-row';
+      const trig = document.createElement('button');
+      trig.type = 'button'; trig.className = 'swatch-trigger';
+      trig.setAttribute('aria-label', 'Pick target colour ' + (i+1));
+      trig.style.backgroundColor = hex;
+      const txt = document.createElement('input');
+      txt.type = 'text'; txt.className = 'hex-text'; txt.maxLength = 7; txt.value = hex;
+      trig.addEventListener('click', e=>{
+        e.stopPropagation();
+        openColorPicker(trig, lottieTargets[i], h=>{ lottieTargets[i] = h; txt.value = h; ldTargetsChanged(); });
+      });
+      txt.addEventListener('change', ()=>{
+        const norm = normalizeHexInput(txt.value);
+        if(norm){ lottieTargets[i] = norm; txt.value = norm; trig.style.backgroundColor = norm; ldTargetsChanged(); }
+        else txt.value = lottieTargets[i];
+      });
+      wrap.appendChild(trig); wrap.appendChild(txt);
+      row.appendChild(wrap);
+
+      if(anchors[i]){
+        const hint = document.createElement('span');
+        hint.className = 'target-hint';
+        hint.innerHTML = `replaces <i style="background:${anchors[i].hex}"></i>${anchors[i].hex}`;
+        row.appendChild(hint);
+      }
+      if(lottieTargets.length > 1){
+        const rm = document.createElement('button');
+        rm.type = 'button'; rm.className = 'icon-btn';
+        rm.setAttribute('aria-label', 'Remove target colour ' + (i+1));
+        rm.innerHTML = IC_X;
+        rm.addEventListener('click', ()=>{ lottieTargets.splice(i,1); ldRenderTargets(); ldTargetsChanged(); });
+        row.appendChild(rm);
+      }
+      box.appendChild(row);
+    });
+    if(lottieTargets.length < LD_MAX_TARGETS){
+      const add = document.createElement('button');
+      add.type = 'button'; add.className = 'btn ghost small-btn target-add';
+      add.innerHTML = IC_PLUS + 'Add target colour';
+      add.addEventListener('click', ()=>{
+        const last = hexToRgb(lottieTargets[lottieTargets.length-1]);
+        const hsl = rgbToHsl(last.r, last.g, last.b);
+        lottieTargets.push(hexFromHsl(hsl.h + 70, Math.max(hsl.s, 55), Math.min(Math.max(hsl.l, 45), 65)));
+        ldRenderTargets(); ldTargetsChanged();
+      });
+      box.appendChild(add);
+    }
+  }
+
+  // Works in OKLCH (perceptual). "Keep harmony": target 1 replaces the design's main vivid colour, target 2 its next
+  // distinct colour, and so on; every other vivid colour follows its nearest one (same hue rotation), keeping its own
+  // lightness contrast. "Monochrome": each vivid colour takes the hue of its nearest target. Neutrals stay untouched
+  // unless "tint" is chosen.
+  function ldRunAdapt(silent){
+    if(!lottieState){ if(!silent) showToast('Import a Lottie JSON or TGS file first'); return; }
+    if(!lottieState.colorEntries.length){ if(!silent) showToast('No colours were found in this file'); return; }
+    if(!lottieTargets.length){ if(!silent) showToast('Add a target colour first'); return; }
+
+    const s = LD_STRENGTH[lottieModeSelect.value] || 0.85;
+    const harmony = document.getElementById('lottie-harmony').value === 'harmony';
+    const keepNeutrals = document.getElementById('lottie-neutrals').value === 'keep';
+    const targets = lottieTargets.map(hexToOklch);
+    const t0 = targets[0];
+    const anchors = ldPickAnchors(targets.length);
 
     const newColorsMap = new Map();
     lottieState.colorEntries.forEach(entry=>{
-      const r255 = Math.round(entry.r*255), g255 = Math.round(entry.g*255), b255 = Math.round(entry.b*255);
-      const hsl = rgbToHsl(r255, g255, b255);
-
-      // Every swatch adopts the target's hue family — this is what makes ALL of them move, even
-      // flat greys/blacks/whites that a pure hue-rotation would have nothing to act on. How much
-      // saturation it takes on scales with how saturated it originally was (vivid stays vivid-ish,
-      // near-neutral picks up a gentler tint), and lightness blends toward the target while keeping
-      // some of the original shading so the design doesn't flatten into one flat colour.
-      const newS = targetHsl.s * (preset.satFloor + preset.satRange * (hsl.s/100));
-      const newL = hsl.l + (targetHsl.l - hsl.l) * preset.lightBlend;
-      const candidateHex = hexFromHsl(targetHsl.h, newS, newL);
-
-      // Classify from the ACTUAL resulting colour difference, not from the formula that produced
-      // it — this is what correctly separates "barely changed" from "soft tint" from "hard shift"
-      // for every kind of target, vivid or achromatic, without special-casing either one.
-      const distPct = ldColorDistancePct(entry.hex, candidateHex);
-      const cls = ldClassifyByDistance(distPct);
-      const newHex = cls.kind === 'neutral' ? entry.hex : candidateHex;
-
-      newColorsMap.set(entry.hex, { hex:newHex, kind:cls.kind, magnitude:cls.magnitude });
+      if(lottieLocked.has(entry.hex)){
+        newColorsMap.set(entry.hex, { hex:entry.hex, kind:'locked', magnitude:0 });
+        return;
+      }
+      if(lottieOverrides.has(entry.hex)){
+        const ov = lottieOverrides.get(entry.hex);
+        const oc = ldClassifyByDistance(ldColorDistancePct(entry.hex, ov));
+        newColorsMap.set(entry.hex, { hex:ov, kind:'custom', arrow:oc.kind, magnitude:oc.magnitude });
+        return;
+      }
+      const o = entry.oklch;
+      let candidateHex;
+      if(entry.neutral){
+        if(keepNeutrals){
+          newColorsMap.set(entry.hex, { hex:entry.hex, kind:'neutral', magnitude:0 });
+          return;
+        }
+        candidateHex = oklchToHex(o.L, Math.min(t0.C*0.3, 0.06)*s, t0.h);
+      } else {
+        // which anchor (and therefore which target) does this colour follow?
+        let idx = 0, best = Infinity;
+        anchors.forEach((a, k)=>{
+          const d = Math.abs(ldAngleDiff(a.oklch.h, o.h));
+          if(d < best){ best = d; idx = k; }
+        });
+        const t = targets[idx];
+        const anc = anchors[idx];
+        if(harmony && anc){
+          const dh = ldAngleDiff(anc.oklch.h, t.h);
+          const ratio = Math.max(0, Math.min(2.5, t.C / Math.max(anc.oklch.C, 0.02)));
+          const k = entry === anc ? 1 : Math.max(0, Math.min(1, o.L/0.3, (1.02 - o.L)/0.25)); // near-black/white move less
+          const L = o.L + (t.L - anc.oklch.L) * s * k;
+          candidateHex = oklchToHex(Math.max(0.05, Math.min(0.98, L)), o.C * (1 + (ratio - 1)*s), o.h + dh*s);
+        } else {
+          const C = t.C * (0.35 + 0.65*Math.min(1, o.C/0.2)) * (0.5 + 0.5*s);
+          candidateHex = oklchToHex(o.L + (t.L - o.L)*0.25*s, C, t.h);
+        }
+      }
+      const cls = ldClassifyByDistance(ldColorDistancePct(entry.hex, candidateHex));
+      newColorsMap.set(entry.hex, { hex: cls.kind === 'neutral' ? entry.hex : candidateHex, kind:cls.kind, magnitude:cls.magnitude });
     });
 
     lottieLatestNewColors = lottieState.colorEntries.map(e=> newColorsMap.get(e.hex).hex);
@@ -1725,7 +2029,25 @@
       ldRenderPreview('adapted', lottieState.json);
       lottiePreviewRow.classList.add('active');
     }
-    showToast(`Adapted ${lottieState.colorEntries.length} colours around ${targetHex}`);
+    lottieHasAdapted = true;
+    if(!silent){
+      const moved = [...newColorsMap.values()].filter(v=> v.kind !== 'locked' && v.kind !== 'neutral').length;
+      const kept = newColorsMap.size - moved;
+      showToast(`Adapted ${moved} colours around ${lottieTargets.join(', ')}` + (kept ? ` · ${kept} kept original` : ''));
+    }
+  }
+
+  function ldReset(){
+    if(!lottieState){ showToast('Import a file first'); return; }
+    lottieState.colorEntries.forEach(e=> e.refs.forEach(fn=> fn(e.r, e.g, e.b)));
+    lottieOverrides.clear();
+    clearTimeout(lottieAdaptTimer);
+    lottieHasAdapted = false;
+    lottieLatestNewColors = [];
+    ldRenderMappingList(null);
+    if(lottieAnimAdapted){ lottieAnimAdapted.destroy(); lottieAnimAdapted = null; }
+    lottieCanvasAdapt.innerHTML = '';
+    showToast('Reset to the original colours');
   }
 
   function ldDownload(content, filename, mime){
@@ -1748,7 +2070,21 @@
     if(f) ldHandleFile(f);
   });
 
-  lottieAdaptBtn.addEventListener('click', ldRunAdapt);
+  lottieAdaptBtn.addEventListener('click', ()=> ldRunAdapt());
+  document.getElementById('lottie-reset-btn').addEventListener('click', ldReset);
+  ['lottie-mode','lottie-harmony','lottie-neutrals'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', ()=>{ if(lottieHasAdapted) ldAdaptSoon(); });
+  });
+  document.getElementById('lock-neutrals').addEventListener('click', ()=>{
+    if(!lottieState) return;
+    lottieState.colorEntries.forEach(e=>{ if(e.neutral) lottieLocked.add(e.hex); });
+    ldAfterLockChange();
+  });
+  document.getElementById('lock-invert').addEventListener('click', ()=>{
+    if(!lottieState) return;
+    lottieState.colorEntries.forEach(e=>{ if(lottieLocked.has(e.hex)) lottieLocked.delete(e.hex); else lottieLocked.add(e.hex); });
+    ldAfterLockChange();
+  });
 
   lottieCopyAllBtn.addEventListener('click', ()=>{
     if(!lottieLatestNewColors.length){ showToast('Run Auto-adapt first'); return; }
@@ -1765,7 +2101,9 @@
     if(!lottieState){ return; }
     if(typeof pako === 'undefined'){ showToast('Gzip library unavailable'); return; }
     const base = lottieState.filename.replace(/\.(json|tgs)$/i,'');
-    const gz = pako.gzip(JSON.stringify(lottieState.json));
+    const compact = JSON.stringify(lottieState.json, (k,v)=> typeof v === 'number' ? Math.round(v*1e4)/1e4 : v);
+    const gz = pako.gzip(compact, { level:9 });
+    if(gz.length > 64*1024) showToast(`Warning: ${(gz.length/1024).toFixed(1)} KB — Telegram stickers must be under 64 KB`);
     ldDownload(gz, base + '-adapted.tgs', 'application/gzip');
   });
 
@@ -1791,7 +2129,7 @@
   const gradColor1 = ColorControl('grad-color1','grad-color1-text','#FF3EA5', ()=> buildGradient());
   const gradColor2 = ColorControl('grad-color2','grad-color2-text','#35E7FF', ()=> buildGradient());
   const palBase = ColorControl('pal-base','pal-base-text','#8B5CF6', ()=> buildPalette());
-  const lottieTarget = ColorControl('lottie-target','lottie-target-text','#FF3EA5', ()=>{ if(lottieState) ldRunAdapt(); });
+  ldRenderTargets();
   const themeA = ColorControl('theme-a', null, '#FF3EA5', applyTheme);
   const themeB = ColorControl('theme-b', null, '#35E7FF', applyTheme);
 
