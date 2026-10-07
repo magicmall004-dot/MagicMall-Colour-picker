@@ -2017,8 +2017,12 @@
           const L = o.L + (t.L - anc.oklch.L) * s * k;
           candidateHex = oklchToHex(Math.max(0.05, Math.min(0.98, L)), o.C * (1 + (ratio - 1)*s), o.h + dh*s);
         } else {
-          const C = t.C * (0.35 + 0.65*Math.min(1, o.C/0.2)) * (0.5 + 0.5*s);
-          candidateHex = oklchToHex(o.L + (t.L - o.L)*0.25*s, C, t.h);
+          // Monochrome: blend lightness and chroma toward the target by the strength amount — at
+          // "Strong match" (s=1) this lands very close to the target's own tone, not a token shift.
+          const targetC = t.C * (0.35 + 0.65*Math.min(1, o.C/0.2));
+          const lBlend = 0.25 + 0.65*s;
+          const cBlend = 0.35 + 0.65*s;
+          candidateHex = oklchToHex(o.L + (t.L - o.L)*lBlend, o.C + (targetC - o.C)*cBlend, t.h);
         }
       }
       const cls = ldClassifyByDistance(ldColorDistancePct(entry.hex, candidateHex));
