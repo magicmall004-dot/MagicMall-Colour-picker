@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MagicMall Colour Forge — Colour Code Generator</title>
 <meta name="description" content="MagicMall's colour code generator: pick solid colours, build gradients, generate palettes, and lift colours from an image — tap any swatch to reveal, tap again to copy.">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -459,6 +460,22 @@
   /* ---------- Theme ---------- */
   .theme-row{ display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
   .theme-preview{ width:48px; height:48px; border-radius:50%; background:var(--accent-mix); border:1px solid var(--glass-border); flex-shrink:0; }
+
+  /* ---------- Telegram in-app-browser download fallback ---------- */
+  #tg-browser-banner{
+    position:fixed; left:12px; right:12px; bottom:12px; z-index:260;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background:rgba(18,14,32,0.92); border:1px solid var(--glass-border);
+    backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%);
+    border-radius:16px; padding:12px 14px; box-shadow:0 14px 34px rgba(0,0,0,0.4);
+    transform:translateY(130%); transition:transform 0.3s cubic-bezier(.2,.8,.2,1);
+  }
+  #tg-browser-banner.show{ transform:translateY(0); }
+  #tg-browser-banner p{ flex:1; min-width:160px; font-size:12.5px; color:var(--text-dim); line-height:1.4; }
+  #tg-browser-banner .btn{ padding:9px 16px; font-size:13px; flex:none; }
+  #tg-browser-banner .dismiss{
+    background:transparent; border:none; color:var(--text-dim); font-size:18px; line-height:1; cursor:pointer; padding:4px 6px; flex:none;
+  }
 
   /* ---------- Toast ---------- */
   #toast{
@@ -1048,6 +1065,55 @@
     if(isValidHex(text)) pushRecent(text.toUpperCase());
   }
   function copyHex(hex){ copyToClipboard(hex); }
+
+  /* ================= Telegram Mini App: download fallback ================= */
+  // Telegram's in-app browser (especially iOS) often silently blocks the normal
+  // <a download> / Blob trick that works in a real browser. There is no server-free way to
+  // force a save from inside that embedded webview, so this tries the native share sheet first,
+  // still attempts the normal download, and always offers a one-tap "open in your browser" exit —
+  // outside Telegram's webview this page behaves exactly like it does on PC.
+  const inTelegram = !!(window.Telegram && window.Telegram.WebApp);
+  if(inTelegram){
+    try{ window.Telegram.WebApp.ready(); } catch(e){}
+  }
+  function showTelegramBrowserBanner(){
+    if(!inTelegram || document.getElementById('tg-browser-banner')) return;
+    const bar = document.createElement('div');
+    bar.id = 'tg-browser-banner';
+    bar.innerHTML = `<p>Telegram's in-app browser can block file downloads. If nothing happened, open this page in your browser instead.</p>
+      <button type="button" class="btn">Open in browser</button>
+      <button type="button" class="dismiss" aria-label="Dismiss">×</button>`;
+    bar.querySelector('.btn').addEventListener('click', ()=>{
+      try{ window.Telegram.WebApp.openLink(window.location.href, { try_instant_view:false }); }
+      catch(e){ window.open(window.location.href, '_blank'); }
+    });
+    bar.querySelector('.dismiss').addEventListener('click', ()=> bar.classList.remove('show'));
+    document.body.appendChild(bar);
+    requestAnimationFrame(()=> bar.classList.add('show'));
+  }
+
+  // Saves a file with the best method available: native share sheet (works on most Android
+  // builds and many iOS versions inside Telegram), falling back to a normal Blob download
+  // (works on desktop and once the user taps "Open in browser"), with the banner always on
+  // standby inside Telegram in case neither one actually reaches the user's device.
+  async function smartDownload(blobOrContent, filename, mime){
+    const blob = blobOrContent instanceof Blob ? blobOrContent : new Blob([blobOrContent], { type: mime });
+    try{
+      const file = new File([blob], filename, { type: mime });
+      if(navigator.canShare && navigator.canShare({ files:[file] })){
+        await navigator.share({ files:[file], title: filename });
+        return;
+      }
+    } catch(shareErr){ /* user cancelled share, or unsupported — fall through to normal download */ }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=> URL.revokeObjectURL(url), 4000);
+
+    if(inTelegram) showTelegramBrowserBanner();
+  }
 
   /* ================= Recently copied strip ================= */
   const recentStrip = document.getElementById('recent-strip');
@@ -2260,12 +2326,7 @@
   }
 
   function ldDownload(content, filename, mime){
-    const blob = new Blob([content], { type:mime });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(()=> URL.revokeObjectURL(url), 4000);
+    smartDownload(content, filename, mime);
   }
 
   function ldDownloadAll(){
@@ -2280,12 +2341,8 @@
         zip.file(base + '-adapted.tgs', pako.gzip(compact, { level:9 }));
       }
     });
-    zip.generateAsync({ type:'blob' }).then(blob=>{
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'colour-forge-pack.zip';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(()=> URL.revokeObjectURL(url), 4000);
+    zip.generateAsync({ type:'blob' }).then(async blob=>{
+      await smartDownload(blob, 'colour-forge-pack.zip', 'application/zip');
       showToast(`Downloaded ${lottieFiles.length} adapted file${lottieFiles.length===1?'':'s'}`);
     }).catch(()=> showToast('Could not build the zip file'));
   }
