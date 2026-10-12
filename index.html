@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080a14">
 <title>MagicMall Colour Forge — Colour Code Generator</title>
 <meta name="description" content="MagicMall's colour code generator: pick solid colours, build gradients, generate palettes, and lift colours from an image — tap any swatch to reveal, tap again to copy.">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -544,6 +545,16 @@
   @media (prefers-reduced-motion:reduce){
     *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; }
   }
+
+  /* ---------- Upgrade: format toggle + contrast badge ---------- */
+  .fmt-toggle{ margin-left:auto; display:flex; gap:6px; align-items:center; }
+  .fmt-btn{ font-family:'JetBrains Mono',monospace; font-size:11.5px; padding:6px 12px; border-radius:9px;
+    border:1px solid var(--glass-border); background:transparent; color:var(--text-dim); cursor:pointer;
+    transition:background .2s ease, color .2s ease; }
+  .fmt-btn:hover{ color:var(--text); }
+  .fmt-btn.active{ background:var(--accent-mix); color:#0a0a0f; border-color:transparent; }
+  .solid-preview{ justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  #solid-contrast{ font-size:12px; }
 </style>
 </head>
 <body>
@@ -577,6 +588,11 @@
   <div class="recent-bar">
     <span class="recent-label">Recently copied</span>
     <div class="recent-strip" id="recent-strip"><span class="recent-empty">Tap any swatch to start collecting colours.</span></div>
+    <div class="fmt-toggle" role="group" aria-label="Copy format">
+      <button type="button" class="fmt-btn" data-fmt="hex">HEX</button>
+      <button type="button" class="fmt-btn" data-fmt="rgb">RGB</button>
+      <button type="button" class="fmt-btn" data-fmt="hsl">HSL</button>
+    </div>
   </div>
 
   <!-- ================= COLOR STUDIO (Solid / Gradient tabs) ================= -->
@@ -613,7 +629,7 @@
 
       <div class="solid-preview-wrap">
         <div class="solid-preview" id="solid-preview">
-          <span class="code" id="solid-preview-code">#FF3EA5</span>
+          <span class="code" id="solid-preview-code">#FF3EA5</span><span class="code" id="solid-contrast"></span>
         </div>
       </div>
 
@@ -1049,22 +1065,40 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(()=> toast.classList.remove('show'), 1600);
   }
+  let accentCache = { a:'#FF3EA5', b:'#35E7FF' };
+  let colorFormat = 'hex';
+  try{ const f = localStorage.getItem('mm-colour-forge-fmt'); if(f==='hex'||f==='rgb'||f==='hsl') colorFormat = f; }catch(e){}
+  function formatColor(hex){
+    if(colorFormat === 'rgb'){ const c = hexToRgb(hex); return `rgb(${c.r}, ${c.g}, ${c.b})`; }
+    if(colorFormat === 'hsl'){ const c = hexToRgb(hex); const h = rgbToHsl(c.r,c.g,c.b); return `hsl(${Math.round(h.h)}, ${Math.round(h.s)}%, ${Math.round(h.l)}%)`; }
+    return hex;
+  }
+  function relLum(hex){ const c = hexToRgb(hex); return 0.2126*s2l(c.r) + 0.7152*s2l(c.g) + 0.0722*s2l(c.b); }
+  function contrastRatio(a, b){ const A = relLum(a), B = relLum(b); return (Math.max(A,B)+0.05) / (Math.min(A,B)+0.05); }
+
   function copyToClipboard(text, message){
     const msg = message || ('Copied ' + text);
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(()=>showToast(msg)).catch(()=>showToast(msg));
-    } else {
+    const fallback = ()=>{
       const ta = document.createElement('textarea');
-      ta.value = text;
+      ta.value = text; ta.setAttribute('readonly','');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
       document.body.appendChild(ta);
-      ta.select();
-      try{ document.execCommand('copy'); } catch(e){}
+      ta.select(); ta.setSelectionRange(0, text.length);
+      let ok = false;
+      try{ ok = document.execCommand('copy'); }catch(e){}
       document.body.removeChild(ta);
-      showToast(msg);
-    }
+      showToast(ok ? msg : 'Copy was blocked — long-press the code to copy it');
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=>showToast(msg)).catch(fallback);
+    } else { fallback(); }
     if(isValidHex(text)) pushRecent(text.toUpperCase());
   }
-  function copyHex(hex){ copyToClipboard(hex); }
+  function copyHex(hex){
+    const out = formatColor(hex);
+    copyToClipboard(out, 'Copied ' + out);
+    pushRecent(hex.toUpperCase());
+  }
 
   /* ================= Telegram Mini App: download fallback ================= */
   // Telegram's in-app browser (especially iOS) often silently blocks the normal
@@ -1074,7 +1108,11 @@
   // outside Telegram's webview this page behaves exactly like it does on PC.
   const inTelegram = !!(window.Telegram && window.Telegram.WebApp);
   if(inTelegram){
-    try{ window.Telegram.WebApp.ready(); } catch(e){}
+    try{
+      const tg = window.Telegram.WebApp;
+      tg.ready(); tg.expand();
+      try{ tg.setHeaderColor('#080a14'); tg.setBackgroundColor('#080a14'); }catch(e){}
+    } catch(e){}
   }
   function showTelegramBrowserBanner(){
     if(!inTelegram || document.getElementById('tg-browser-banner')) return;
@@ -1177,6 +1215,7 @@
         setTimeout(()=> closeSwatchPopup(wrap), 850);
       } else {
         if(openPopupWrap && openPopupWrap !== wrap) closeSwatchPopup(openPopupWrap);
+        pop.querySelector('.hint').textContent = 'tap to copy';
         sw.classList.add('expanded');
         pop.classList.add('show');
         wrap.dataset.state = 'open';
@@ -1220,7 +1259,7 @@
 
       const pop = document.createElement('div');
       pop.className = 'swatch-popup';
-      pop.innerHTML = `<div class="cue" style="background:${hex}"></div><div class="code-text">${hex}</div><div class="hint">tap to copy</div>`;
+      pop.innerHTML = `<div class="cue" style="background:${hex}"></div><div class="code-text" data-hex="${hex}">${formatColor(hex)}</div><div class="hint">tap to copy</div>`;
 
       wrap.appendChild(sw);
       wrap.appendChild(pop);
@@ -1386,6 +1425,7 @@
   const chartCount = document.getElementById('chart-count');
   const solidPreview = document.getElementById('solid-preview');
   const solidPreviewCode = document.getElementById('solid-preview-code');
+  const solidContrast = document.getElementById('solid-contrast');
 
   function buildSolidChart(){
     const steps = clampInt(chartCount.value, 4, 12);
@@ -1395,6 +1435,10 @@
 
     solidPreview.style.background = solidColor.value;
     solidPreviewCode.textContent = solidColor.value;
+    const cw = contrastRatio(solidColor.value,'#FFFFFF'), cb = contrastRatio(solidColor.value,'#000000');
+    const best = cw >= cb ? { n:'white', r:cw } : { n:'black', r:cb };
+    const grade = best.r >= 7 ? 'AAA' : best.r >= 4.5 ? 'AA' : best.r >= 3 ? 'AA large only' : 'fails';
+    solidContrast.textContent = `Best text: ${best.n} · ${best.r.toFixed(1)}:1 · ${grade}`;
 
     const tints = [], shades = [], tones = [];
     for(let i=1;i<=steps;i++){
@@ -1530,7 +1574,7 @@
   document.getElementById('pal-generate').addEventListener('click', buildPalette);
   document.getElementById('pal-copy-all').addEventListener('click', ()=>{
     if(!lastPalHexes.length) return;
-    copyToClipboard(lastPalHexes.join(', '), lastPalHexes.length + ' colours copied');
+    copyToClipboard(lastPalHexes.map(formatColor).join(', '), lastPalHexes.length + ' colours copied');
   });
 
   /* ================= Image color picker ================= */
@@ -1647,14 +1691,16 @@
   });
   document.getElementById('extract-copy-all').addEventListener('click', ()=>{
     if(!lastExtractHexes.length) return;
-    copyToClipboard(lastExtractHexes.join(', '), lastExtractHexes.length + ' colours copied');
+    copyToClipboard(lastExtractHexes.map(formatColor).join(', '), lastExtractHexes.length + ' colours copied');
   });
 
   /* ================= Theme accent ================= */
   const root = document.documentElement;
   function applyTheme(){
+    accentCache = { a:themeA.value, b:themeB.value };
     root.style.setProperty('--accent-a', themeA.value);
     root.style.setProperty('--accent-b', themeB.value);
+    try{ localStorage.setItem('mm-colour-forge-theme', JSON.stringify(accentCache)); }catch(e){}
   }
   document.getElementById('theme-reset').addEventListener('click', ()=>{
     themeA.set('#FF3EA5', false);
@@ -2494,6 +2540,21 @@
   ldRenderTargets();
   const themeA = ColorControl('theme-a', null, '#FF3EA5', applyTheme);
   const themeB = ColorControl('theme-b', null, '#35E7FF', applyTheme);
+  try{
+    const t = JSON.parse(localStorage.getItem('mm-colour-forge-theme') || 'null');
+    if(t && isValidHex(t.a) && isValidHex(t.b)){ themeA.set(t.a, false); themeB.set(t.b, false); applyTheme(); }
+  }catch(e){}
+
+  document.querySelectorAll('.fmt-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.fmt === colorFormat);
+    btn.addEventListener('click', ()=>{
+      colorFormat = btn.dataset.fmt;
+      try{ localStorage.setItem('mm-colour-forge-fmt', colorFormat); }catch(e){}
+      document.querySelectorAll('.fmt-btn').forEach(b=> b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.swatch-popup .code-text').forEach(el=>{ el.textContent = formatColor(el.dataset.hex); });
+      showToast('Copy format: ' + colorFormat.toUpperCase());
+    });
+  });
 
   /* ================= Sticky quick nav ================= */
   const quickNav = document.getElementById('quick-nav');
@@ -2518,7 +2579,7 @@
         revealObserver.unobserve(entry.target);
       }
     });
-  }, { threshold:0.12, rootMargin:'0px 0px -40px 0px' });
+  }, { threshold:0.01, rootMargin:'0px 0px -40px 0px' });
   document.querySelectorAll('.panel').forEach(p=> revealObserver.observe(p));
 
   /* ================= Panel spotlight glow ================= */
@@ -2551,12 +2612,7 @@
   ];
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function getAccent(name){
-    const styles = getComputedStyle(root);
-    if(name==='a') return styles.getPropertyValue('--accent-a').trim();
-    if(name==='b') return styles.getPropertyValue('--accent-b').trim();
-    return styles.getPropertyValue('--accent-a').trim();
-  }
+  function getAccent(name){ return name === 'b' ? accentCache.b : accentCache.a; }
 
   function draw(t){
     ctx.clearRect(0,0,w,h);
