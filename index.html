@@ -317,6 +317,16 @@
   .preview-bg-label{ font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-dim); margin-right:2px; }
   .bg-toggle-btn{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12.5px; padding:6px 13px; border-radius:9px; border:1px solid var(--glass-border); background:transparent; color:var(--text-dim); cursor:pointer; transition:background .2s ease, color .2s ease, border-color .2s ease; }
   .bg-toggle-btn:hover{ color:var(--text); }
+  .seg-btn{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12.5px; padding:6px 13px; border-radius:9px; border:1px solid var(--glass-border); background:transparent; color:var(--text-dim); cursor:pointer; }
+  .seg-btn.active{ background:var(--accent-mix); color:#0a0a0f; border-color:transparent; }
+  #lottie-dock{ position:fixed; right:16px; bottom:16px; width:200px; z-index:30; background:rgba(12,14,28,.92); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid var(--glass-border); border-radius:16px; padding:8px; box-shadow:0 12px 40px rgba(0,0,0,.5); }
+  #lottie-dock[hidden]{ display:none; }
+  .ldock-bar{ display:flex; align-items:center; gap:6px; margin-bottom:6px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); }
+  .ldock-bar span{ flex:1; }
+  .ldock-bar button{ background:transparent; border:1px solid var(--glass-border); color:var(--text); border-radius:8px; width:26px; height:24px; cursor:pointer; }
+  #ldock-canvas{ height:180px !important; } #ldock-canvas:empty::before{ content:none; }
+  #lottie-dock.min #ldock-canvas{ display:none; } #lottie-dock.min{ width:150px; }
+  @media(max-width:700px){ #lottie-dock{ width:140px; right:10px; bottom:10px; } #ldock-canvas{ height:120px !important; } }
   .bg-toggle-btn.active{ background:var(--accent-mix); color:#0a0a0f; border-color:transparent; }
   .lottie-canvas.bg-checker{
     background-image:
@@ -443,6 +453,28 @@
   .lock-sub .ic{ width:12px; height:12px; }
   .lock-chip .lc-badge{ color:#0a0a0f; }
   .lock-chip .lc-badge .ic{ width:12px; height:12px; stroke-width:2.4; }
+  .lock-chip .lc-box{ position:relative; overflow:hidden; }
+  .lock-chip .lc-new{ position:absolute; inset:0 0 0 50%; background:var(--n,transparent); display:none; border-left:1px solid rgba(255,255,255,.35); }
+  .lock-chip.changed .lc-new{ display:block; }
+  .lock-chip.changed{ border-color:var(--accent-a); background:rgba(255,62,165,0.08); }
+  .lock-chip .lc-lk,.lock-chip .lc-x{ position:absolute; top:4px; width:22px; height:22px; border-radius:50%; border:0; cursor:pointer; display:flex; align-items:center; justify-content:center; background:rgba(8,10,20,.75); color:var(--text); font-size:11px; }
+  .lock-chip .lc-lk{ left:4px; } .lock-chip .lc-x{ right:4px; display:none; }
+  .lock-chip.changed .lc-x{ display:flex; } .lock-chip.locked .lc-lk{ background:var(--accent-b); color:#0a0a0f; }
+  .lock-chip .lc-lk .ic{ width:12px; height:12px; }
+  .rp-box{ background:var(--glass); border:1px solid var(--glass-border); border-radius:14px; padding:14px; margin-bottom:14px; }
+  .rp-modes{ float:right; display:inline-flex; gap:6px; }
+  .pt-box{ margin-top:8px; border:1px solid var(--glass-border); border-radius:12px; padding:8px 10px; }
+  .pt-box summary{ cursor:pointer; display:flex; align-items:center; gap:8px; }
+  .pt-row{ display:flex; align-items:center; gap:8px; padding:6px 0; border-top:1px solid var(--glass-border); }
+  .pt-row.custom .pt-name{ color:var(--accent-a); }
+  .pt-name{ flex:1; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .pt-name small{ color:var(--text-dim); }
+  .rp-title{ font-weight:700; margin-bottom:4px; } .rp-sub{ font-size:12px; color:var(--text-dim); margin-bottom:10px; }
+  .rp-row{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:8px 0; border-top:1px solid var(--glass-border); }
+  .rp-row.kept{ opacity:.6 }
+  .rp-o,.rp-n{ width:34px; height:34px; border-radius:10px; border:1px solid rgba(255,255,255,.3); flex:none; display:inline-block; cursor:pointer; padding:0; }
+  .rp-o{ cursor:default } .rp-h{ font-family:'JetBrains Mono',monospace; font-size:12px; min-width:70px }
+  .rp-ar{ color:var(--accent-b) } .rp-t{ width:84px; background:rgba(0,0,0,.25); border:1px solid var(--glass-border); color:var(--text); border-radius:8px; padding:7px; font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .rp-q{ display:inline-flex; gap:5px; flex:1 } .rp-q i{ width:20px; height:20px; border-radius:50%; border:1px solid rgba(255,255,255,.4); cursor:pointer }
 
   .target-list{ display:flex; flex-direction:column; gap:8px; }
   .target-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
@@ -766,7 +798,7 @@
     <div class="panel-head">
       <div>
         <div class="panel-title"><span class="panel-num">04</span> Lottie / TGS Colour Adapter</div>
-        <div class="panel-desc">Import one or more Lottie <code>.json</code> or Telegram <code>.tgs</code> stickers and pick one or more target colours. In “Keep harmony” mode your first target replaces the design's main colour, the second replaces its next distinct colour, and so on; every remaining colour follows its nearest one, so relationships and contrast survive; “Monochrome” pushes everything to one hue. Black, white and grey stay untouched by default. Lock any colour to keep it original, or tap an adapted swatch to set your own. Import a whole sticker pack at once and adapt every file together.</div>
+        <div class="panel-desc">Import one or more Lottie <code>.json</code> or Telegram <code>.tgs</code> stickers and pick one or more target colours. In “Keep harmony” mode your first target replaces the design's main colour, the second replaces its next distinct colour, and so on; every remaining colour follows its nearest one, so relationships and contrast survive; “Monochrome” pushes everything to one hue. <b>Tap any colour chip (black and white included) to set your own colour for it — the preview and downloads update live. Tap its lock to keep it original, ✕ to reset.</b> Black, white and grey are fully editable. Import a whole sticker pack at once and adapt every file together.</div>
       </div>
     </div>
 
@@ -810,10 +842,12 @@
             <button class="btn ghost small-btn" id="lock-neutrals">Lock black/white/grey</button>
             <button class="btn ghost small-btn" id="lock-invert">Invert</button>
             <button class="btn ghost small-btn" id="lock-all">Lock all</button>
+            <button class="btn ghost small-btn" id="lock-undo" title="Undo (Ctrl+Z)">↶ Undo</button>
+            <button class="btn ghost small-btn" id="lock-redo" title="Redo (Ctrl+Y)">↷ Redo</button>
             <button class="btn ghost small-btn" id="lock-none">Unlock all</button>
           </div>
         </div>
-        <div class="lock-sub">Tap a colour to keep it original (<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>). Locked colours won't change when you adapt.</div>
+        <div class="lock-sub">Tap a colour to recolour it · tap the lock to keep it original (<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>). Locked colours won't change when you adapt.</div>
         <div class="lock-toolbar">
           <input type="text" id="lock-search" class="lock-search-input" placeholder="Search by hex…">
           <button class="btn ghost small-btn" id="lock-sort-toggle">Sort: Most used</button>
@@ -824,6 +858,8 @@
       <div class="controls" style="margin-top:18px;">
         <div class="field">
           <label>Target colours</label>
+          <div class="rp-box"><div class="rp-title">Replace design colours <span class="rp-modes"><button type="button" class="seg-btn active" id="edit-basic">Basic</button><button type="button" class="seg-btn" id="edit-adv">Advanced · by part</button></span></div><div class="rp-sub">Left = colour found in your design · right = the colour you want instead. Tap the right swatch or type a hex.</div><div id="lottie-replace"></div>
+          <div id="lottie-parts" style="display:none"></div></div>
           <div class="preset-row" id="lottie-presets"></div>
           <div class="target-list" id="lottie-targets"></div>
         </div>
@@ -838,7 +874,8 @@
         <div class="field">
           <label for="lottie-harmony">Colour mode</label>
           <select id="lottie-harmony">
-            <option value="harmony" selected>Keep harmony</option>
+            <option value="manual" selected>Manual — only colours I target</option>
+            <option value="harmony">Keep harmony (auto, around my target colours)</option>
             <option value="mono">Monochrome (one hue)</option>
           </select>
         </div>
@@ -919,6 +956,7 @@
 
 <footer>MagicMall Colour Forge — built for pulling colour codes straight into your designs.</footer>
 
+<div id="lottie-dock" hidden><div class="ldock-bar"><span>Live preview</span><button type="button" id="ldock-bg" title="Change background">◐</button><button type="button" id="ldock-min" title="Minimise">—</button></div><div id="ldock-canvas" class="lottie-canvas bg-checker"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1732,6 +1770,7 @@
   let lottieHasAdapted = false;    // active file's adapted flag
   let lottieOverrides = new Map(); // active file's manual overrides
   let lottieAdaptTimer = null;
+  let lottieAdv = false, lottieFlash = null;
   let lottieTargets = ["#FF3EA5"]; // one or more target colours (max 6), shared across every file
   let lottieColorFilter = '';
   let lottieColorSort = 'count';   // 'count' | 'hue'
@@ -1745,12 +1784,16 @@
   // solid shape fills/strokes (static + keyframed), gradient fill/stroke stops, flat-hex solid-colour
   // layers, and colour parameters on Fill/Tint/Tritone-style effects. Each match is stored as a small
   // "apply(r,g,b)" closure so recolouring later is just calling every closure.
+  let ldCurPart = '', ldCurLayer = '';
   function ldWalkColors(node, refs){
     if(Array.isArray(node)){
       for(let i=0;i<node.length;i++) ldWalkColors(node[i], refs);
       return;
     }
     if(node && typeof node === 'object'){
+      const _pp = ldCurPart, _pl = ldCurLayer;
+      if(typeof node.ty === 'number' && node.nm){ ldCurLayer = node.nm; ldCurPart = node.nm; }
+      else if(node.ty === 'gr' && node.nm && ldCurPart === ldCurLayer){ ldCurPart = ldCurLayer + ' › ' + node.nm; }
       if((node.ty === 'fl' || node.ty === 'st') && node.c && node.c.k !== undefined){
         ldRegisterSolidColorProp(node.c, refs);
       }
@@ -1768,6 +1811,7 @@
         });
       }
       for(const key in node){ ldWalkColors(node[key], refs); }
+      ldCurPart = _pp; ldCurLayer = _pl;
     }
   }
 
@@ -1776,6 +1820,7 @@
     let entry = refs.find(e=> e.hex === hex);
     if(!entry){ entry = { hex, r:ldClamp01(r), g:ldClamp01(g), b:ldClamp01(b), count:0, refs:[] }; refs.push(entry); }
     entry.count++;
+    applyFn._part = ldCurPart || 'Main';
     entry.refs.push(applyFn);
   }
 
@@ -1879,22 +1924,103 @@
       box.appendChild(note);
     } else {
       list.forEach(entry=>{
-        const locked = lottieLocked.has(entry.hex);
-        const chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'lock-chip' + (locked ? ' locked' : '');
-        chip.style.setProperty('--c', entry.hex);
-        chip.setAttribute('aria-pressed', locked);
-        chip.setAttribute('aria-label', (locked ? 'Unlock ' : 'Keep original ') + entry.hex);
-        chip.innerHTML = `<span class="lc-box"></span><span class="lc-hex">${entry.hex}</span><span class="lc-count">×${entry.count}</span><span class="lc-badge">${LOCK_SVG}</span>`;
-        chip.addEventListener('click', ()=>{
-          if(lottieLocked.has(entry.hex)) lottieLocked.delete(entry.hex); else lottieLocked.add(entry.hex);
-          ldAfterLockChange();
+        const chip = document.createElement('div');
+        chip.className = 'lock-chip' + (lottieLocked.has(entry.hex) ? ' locked' : '');
+        chip.dataset.hex = entry.hex; chip.tabIndex = 0; chip.setAttribute('role','button');
+        chip.innerHTML = `<span class="lc-box"><i class="lc-new"></i></span><span class="lc-hex">${entry.hex}</span><span class="lc-count">×${entry.count}</span><button type="button" class="lc-lk" title="Lock = keep this colour original">${LOCK_SVG}</button><button type="button" class="lc-x" title="Reset this colour">✕</button>`;
+        const pick = ()=>{
+          const cur = lottieOverrides.get(entry.hex) || entry.hex;
+          openColorPicker(chip.querySelector('.lc-box'), cur, hex=>{
+            lottieOverrides.set(entry.hex, hex.toUpperCase()); lottieLocked.delete(entry.hex); ldRunAdapt(true);
+          });
+        };
+        chip.addEventListener('click', e=>{
+          e.stopPropagation();
+          if(e.target.closest('.lc-lk')){ if(lottieLocked.has(entry.hex)) lottieLocked.delete(entry.hex); else { lottieLocked.add(entry.hex); lottieOverrides.delete(entry.hex); } ldRunAdapt(true); return; }
+          if(e.target.closest('.lc-x')){ lottieOverrides.delete(entry.hex); lottieLocked.delete(entry.hex); ldRunAdapt(true); return; }
+          pick();
         });
+        chip.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } });
         box.appendChild(chip);
       });
     }
-    countEl.textContent = lottieLocked.size ? `· ${lottieLocked.size} locked` : '';
+    ldBuildReplaceRows();
+    ldBuildParts();
+    ldUpdateChips();
+  }
+  function ldBuildReplaceRows(){
+    const box = document.getElementById('lottie-replace'); if(!box) return;
+    box.innerHTML = '';
+    if(!lottieState) return;
+    lottieState.colorEntries.forEach(entry=>{
+      const row = document.createElement('div'); row.className = 'rp-row'; row.dataset.hex = entry.hex;
+      row.innerHTML = `<i class="rp-o" style="background:${entry.hex}"></i><b class="rp-h">${entry.hex}</b><span class="rp-ar">→</span><button type="button" class="rp-n swatch-trigger" title="Tap to pick the new colour"></button><input class="rp-t" maxlength="7" spellcheck="false"><span class="rp-q"></span><button type="button" class="rp-k btn ghost small-btn">Keep</button><button type="button" class="rp-r btn ghost small-btn">Reset</button>`;
+      const setNew = hex=>{ lottieOverrides.set(entry.hex, hex.toUpperCase()); lottieLocked.delete(entry.hex); ldRunAdapt(true); };
+      row.querySelector('.rp-n').addEventListener('click', e=>{
+        e.stopPropagation();
+        openColorPicker(e.currentTarget, lottieOverrides.get(entry.hex) || entry.hex, setNew);
+      });
+      row.querySelector('.rp-t').addEventListener('change', e=>{
+        const n = normalizeHexInput(e.target.value); if(n) setNew(n); else ldUpdateChips();
+      });
+      row.querySelector('.rp-k').addEventListener('click', ()=>{ lottieLocked.add(entry.hex); lottieOverrides.delete(entry.hex); ldRunAdapt(true); });
+      row.querySelector('.rp-r').addEventListener('click', ()=>{ lottieLocked.delete(entry.hex); lottieOverrides.delete(entry.hex); ldRunAdapt(true); });
+      row.querySelector('.rp-q').addEventListener('click', e=>{
+        const d = e.target.closest('[data-c]'); if(d){ e.stopPropagation(); setNew(d.dataset.c); }
+      });
+      box.appendChild(row);
+    });
+  }
+  function ldBuildParts(){
+    const box = document.getElementById('lottie-parts'); if(!box) return;
+    box.innerHTML = '';
+    if(!lottieState || !lottieAdv) return;
+    box.innerHTML = '<div class="rp-sub" style="margin-top:12px">Advanced: each part (layer / group) of the design can get its own colour. Hold 👁 to see where a part is (it flashes pink). Parts you don\'t touch follow the colour above.</div>';
+    lottieState.colorEntries.forEach(entry=>{
+      const parts = new Map(); entry.refs.forEach(f=> parts.set(f._part, (parts.get(f._part)||0)+1));
+      const d = document.createElement('details'); d.className = 'pt-box'; d.open = lottieState.colorEntries.length <= 3;
+      d.innerHTML = `<summary><i class="rp-o" style="background:${entry.hex}"></i> <b class="rp-h">${entry.hex}</b> <span class="rp-sub" style="margin:0">${parts.size} parts</span></summary>`;
+      parts.forEach((n, name)=>{
+        const pk = name + '|' + entry.hex;
+        const r = document.createElement('div'); r.className = 'pt-row'; r.dataset.pk = pk; r.dataset.hex = entry.hex;
+        r.innerHTML = `<span class="pt-name" title="${ldEscapeHtml(name)}">${ldEscapeHtml(name)} <small>×${n}</small></span><button type="button" class="rp-n swatch-trigger"></button><button type="button" class="btn ghost small-btn pt-eye" title="Hold to locate">👁</button><button type="button" class="btn ghost small-btn pt-rs">Reset</button>`;
+        r.querySelector('.rp-n').addEventListener('click', e=>{
+          e.stopPropagation();
+          openColorPicker(e.currentTarget, ldPO().get(pk) || lottieOverrides.get(entry.hex) || entry.hex, hex=>{ ldPO().set(pk, hex.toUpperCase()); ldRunAdapt(true); });
+        });
+        r.querySelector('.pt-rs').addEventListener('click', ()=>{ ldPO().delete(pk); ldRunAdapt(true); });
+        const eye = r.querySelector('.pt-eye'), off = ()=>{ if(lottieFlash){ lottieFlash = null; ldRunAdapt(true); } };
+        eye.addEventListener('pointerdown', ()=>{ lottieFlash = pk; ldRunAdapt(true); });
+        ['pointerup','pointerleave','pointercancel'].forEach(ev=> eye.addEventListener(ev, off));
+        d.appendChild(r);
+      });
+      box.appendChild(d);
+    });
+  }
+  // Refresh chip look in place (keeps an open colour picker alive while dragging)
+  function ldUpdateChips(){
+    if(!lottieState) return;
+    const latest = new Map(lottieState.colorEntries.map((e,i)=>[e.hex, lottieLatestNewColors[i]]));
+    document.querySelectorAll('#lock-chips .lock-chip').forEach(ch=>{
+      const h = ch.dataset.hex, lk = lottieLocked.has(h), ov = lottieOverrides.get(h);
+      const now = lk ? h : (ov || latest.get(h) || h);
+      ch.className = 'lock-chip' + (lk ? ' locked' : '') + (now.toLowerCase() !== h.toLowerCase() ? ' changed' : '');
+      ch.style.setProperty('--c', h); ch.style.setProperty('--n', now);
+      ch.setAttribute('aria-label', h + (lk ? ' kept original' : now !== h ? ' → ' + now : ' — tap to set a colour'));
+    });
+    document.querySelectorAll('#lottie-replace .rp-row').forEach(r=>{
+      const h = r.dataset.hex, lk = lottieLocked.has(h), now = lk ? h : (lottieOverrides.get(h) || latest.get(h) || h);
+      r.classList.toggle('kept', lk);
+      r.querySelector('.rp-n').style.background = now;
+      const t = r.querySelector('.rp-t'); if(document.activeElement !== t) t.value = lk ? 'kept' : now.toUpperCase();
+      r.querySelector('.rp-q').innerHTML = lottieTargets.map(c=>`<i data-c="${c}" title="Use ${c}" style="background:${c}"></i>`).join('');
+    });
+    document.querySelectorAll('#lottie-parts .pt-row').forEach(r=>{
+      const h = r.dataset.hex, base = lottieLocked.has(h) ? h : (lottieOverrides.get(h) || latest.get(h) || h), pv = ldPO().get(r.dataset.pk);
+      r.querySelector('.rp-n').style.background = pv || base; r.classList.toggle('custom', !!pv);
+    });
+    const n = lottieOverrides.size + ldPO().size, k = lottieLocked.size;
+    document.getElementById('lock-count').textContent = (n||k) ? `· ${n} recoloured · ${k} kept` : '';
   }
   function ldAfterLockChange(){
     ldRenderLockChips();
@@ -1994,6 +2120,7 @@
     lottieLocked = rec.locked;
     lottieOverrides = rec.overrides;
     lottieHasAdapted = rec.hasAdapted;
+    ldHistReset();
     lottieLatestNewColors = [];
     lottieColorFilter = '';
     const search = document.getElementById('lock-search');
@@ -2100,6 +2227,8 @@
       });
       if(which === 'original') lottieAnimOriginal = anim; else lottieAnimAdapted = anim;
     } catch(err){ /* preview is a bonus, ignore failures */ }
+    if(which === 'adapted') ldDockRender();
+    ldDockSync();
   }
 
   /* ---------- Preview background (checkerboard / light / dark chat) ---------- */
@@ -2115,6 +2244,35 @@
     });
   });
   [lottieCanvasOrig, lottieCanvasAdapt].forEach(c=> c.classList.add('bg-checker'));
+
+  /* ---------- Floating live preview: follows you while you edit colours far below the main preview ---------- */
+  const ldDock = document.getElementById('lottie-dock'), ldDockCv = document.getElementById('ldock-canvas');
+  let ldDockAnim = null, ldPanelIn = false, ldPrevIn = true, ldDockBg = 0;
+  function ldDockRender(){
+    if(typeof lottie === 'undefined' || !lottieState || ldDock.hidden || ldDock.classList.contains('min')) return;
+    const fr = ldDockAnim ? ldDockAnim.currentFrame : 0;
+    if(ldDockAnim){ ldDockAnim.destroy(); ldDockAnim = null; }
+    ldDockCv.innerHTML = '';
+    try{
+      ldDockAnim = lottie.loadAnimation({ container: ldDockCv, renderer:'svg', loop:true, autoplay:true, animationData: JSON.parse(JSON.stringify(lottieState.json)) });
+      ldDockAnim.goToAndPlay(fr, true);
+    }catch(err){}
+  }
+  function ldDockSync(){
+    const show = !!lottieState && ldPanelIn && !ldPrevIn, was = !ldDock.hidden;
+    ldDock.hidden = !show;
+    if(show && !was) ldDockRender();
+    if(!show && ldDockAnim){ ldDockAnim.destroy(); ldDockAnim = null; }
+  }
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(es=>{ ldPanelIn = es[0].isIntersecting; ldDockSync(); }).observe(document.getElementById('lottie-panel'));
+    new IntersectionObserver(es=>{ ldPrevIn = es[0].isIntersecting; ldDockSync(); }).observe(lottiePreviewRow);
+  }
+  document.getElementById('ldock-min').addEventListener('click', ()=>{ ldDock.classList.toggle('min'); ldDockRender(); });
+  document.getElementById('ldock-bg').addEventListener('click', ()=>{
+    ldDockBg = (ldDockBg + 1) % 3;
+    ldDockCv.classList.remove('bg-checker','bg-light','bg-dark'); ldDockCv.classList.add(['bg-checker','bg-light','bg-dark'][ldDockBg]);
+  });
 
   // Soft / hard / neutral classification based on the ACTUAL colour difference between the
   // original swatch and its adapted replacement (a redmean RGB distance, 0-100%). This works the
@@ -2218,15 +2376,19 @@
     });
   }
 
+  function ldPO(){ return lottieState ? (lottieState.partOv = lottieState.partOv || new Map()) : new Map(); }
   function ldApplyColorsToJson(entries, newColorsMap){
+    const po = (lottieAdv && lottieState) ? ldPO() : null;
     entries.forEach(entry=>{
       const info = newColorsMap.get(entry.hex);
-      if(info.kind === 'locked' || info.hex === entry.hex){
-        entry.refs.forEach(applyFn=> applyFn(entry.r, entry.g, entry.b)); // exact original
-        return;
-      }
-      const rgb = hexToRgb(info.hex);
-      entry.refs.forEach(applyFn=> applyFn(rgb.r/255, rgb.g/255, rgb.b/255));
+      const base = (info.kind === 'locked' || info.hex === entry.hex) ? [entry.r, entry.g, entry.b] : (c=>[c.r/255,c.g/255,c.b/255])(hexToRgb(info.hex));
+      entry.refs.forEach(fn=>{
+        const pk = fn._part + '|' + entry.hex;
+        let c = base;
+        if(po && po.has(pk)){ const q = hexToRgb(po.get(pk)); c = [q.r/255,q.g/255,q.b/255]; }
+        if(lottieFlash === pk) c = [1,0,0.8];
+        fn(c[0], c[1], c[2]);
+      });
     });
   }
 
@@ -2250,6 +2412,7 @@
     return {
       s: LD_STRENGTH[lottieModeSelect.value] || 0.85,
       harmony: document.getElementById('lottie-harmony').value === 'harmony',
+      manual: document.getElementById('lottie-harmony').value === 'manual',
       keepNeutrals: document.getElementById('lottie-neutrals').value === 'keep',
       targets: lottieTargets.map(hexToOklch)
     };
@@ -2276,6 +2439,7 @@
         map.set(entry.hex, { hex:ov, kind:'custom', arrow:oc.kind, magnitude:oc.magnitude });
         return;
       }
+      if(settings.manual){ map.set(entry.hex, { hex:entry.hex, kind:'neutral', magnitude:0 }); return; }
       const o = entry.oklch;
       let candidateHex;
       if(entry.neutral){
@@ -2313,16 +2477,41 @@
     return map;
   }
 
+  let ldHist = [], ldFut = [], ldCur = null, ldLastT = 0, ldRestoring = false;
+  function ldSnap(){ return JSON.stringify({ o:[...lottieOverrides], l:[...lottieLocked], p:[...ldPO()] }); }
+  function ldHistReset(){ ldHist = []; ldFut = []; ldCur = ldSnap(); ldHistBtns(); }
+  function ldHistBtns(){
+    const u = document.getElementById('lock-undo'), r = document.getElementById('lock-redo');
+    if(u) u.disabled = !ldHist.length; if(r) r.disabled = !ldFut.length;
+  }
+  function ldRecord(){
+    if(ldRestoring || !lottieState || lottieFlash) return;
+    const sig = ldSnap(); if(sig === ldCur) return;
+    const now = Date.now();
+    if(now - ldLastT > 600){ ldHist.push(ldCur); if(ldHist.length > 100) ldHist.shift(); }
+    ldCur = sig; ldLastT = now; ldFut = []; ldHistBtns();
+  }
+  function ldRestore(sig){
+    const d = JSON.parse(sig);
+    lottieOverrides = new Map(d.o); lottieLocked = new Set(d.l); lottieState.partOv = new Map(d.p);
+    lottieState.overrides = lottieOverrides; lottieState.locked = lottieLocked;
+    ldCur = sig; ldRestoring = true; ldRunAdapt(true); ldRestoring = false; ldHistBtns();
+  }
+  function ldUndo(){ if(!lottieState || !ldHist.length) return; ldFut.push(ldCur); ldRestore(ldHist.pop()); }
+  function ldRedo(){ if(!lottieState || !ldFut.length) return; ldHist.push(ldCur); ldRestore(ldFut.pop()); }
+
   function ldRunAdapt(silent){
     if(!lottieState){ if(!silent) showToast('Import a Lottie JSON or TGS file first'); return; }
     if(!lottieState.colorEntries.length){ if(!silent) showToast('No colours were found in this file'); return; }
     if(!lottieTargets.length){ if(!silent) showToast('Add a target colour first'); return; }
 
+    ldRecord();
     const settings = ldGatherSettings();
     const newColorsMap = ldComputeMap(lottieState.colorEntries, lottieLocked, lottieOverrides, settings);
 
     lottieLatestNewColors = lottieState.colorEntries.map(e=> newColorsMap.get(e.hex).hex);
     ldRenderMappingList(newColorsMap);
+    ldUpdateChips();
     ldApplyColorsToJson(lottieState.colorEntries, newColorsMap);
     if(typeof lottie !== 'undefined'){
       ldRenderPreview('adapted', lottieState.json);
@@ -2394,6 +2583,23 @@
   }
 
   lottieAdaptBtn.addEventListener('click', ()=> ldRunAdapt());
+  document.getElementById('lock-undo').addEventListener('click', ldUndo);
+  document.getElementById('lock-redo').addEventListener('click', ldRedo);
+  document.addEventListener('keydown', e=>{
+    if(!(e.ctrlKey || e.metaKey) || !lottieState || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const k = e.key.toLowerCase();
+    if(k === 'z'){ e.preventDefault(); e.shiftKey ? ldRedo() : ldUndo(); }
+    else if(k === 'y'){ e.preventDefault(); ldRedo(); }
+  });
+  [['edit-basic', false], ['edit-adv', true]].forEach(([id, on])=>{
+    document.getElementById(id).addEventListener('click', ()=>{
+      lottieAdv = on;
+      document.getElementById('edit-basic').classList.toggle('active', !on);
+      document.getElementById('edit-adv').classList.toggle('active', on);
+      document.getElementById('lottie-parts').style.display = on ? 'block' : 'none';
+      ldBuildParts(); if(lottieState) ldRunAdapt(true);
+    });
+  });
   document.getElementById('lottie-reset-btn').addEventListener('click', ldReset);
   document.getElementById('lottie-adapt-all').addEventListener('click', ldAdaptAll);
   document.getElementById('lottie-download-all').addEventListener('click', ldDownloadAll);
@@ -2413,12 +2619,14 @@
 
   lottieDlJsonBtn.addEventListener('click', ()=>{
     if(!lottieState){ showToast('Import a file first'); return; }
+    clearTimeout(lottieAdaptTimer); if(lottieHasAdapted) ldRunAdapt(true);
     const base = lottieState.filename.replace(/\.(json|tgs)$/i,'');
     ldDownload(JSON.stringify(lottieState.json), base + '-adapted.json', 'application/json');
   });
 
   lottieDlTgsBtn.addEventListener('click', ()=>{
     if(!lottieState){ return; }
+    clearTimeout(lottieAdaptTimer); if(lottieHasAdapted) ldRunAdapt(true);
     if(typeof pako === 'undefined'){ showToast('Gzip library unavailable'); return; }
     const base = lottieState.filename.replace(/\.(json|tgs)$/i,'');
     const compact = JSON.stringify(lottieState.json, (k,v)=> typeof v === 'number' ? Math.round(v*1e4)/1e4 : v);
